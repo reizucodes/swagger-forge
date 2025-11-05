@@ -109,7 +109,9 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
                 <input type="checkbox" checked={!!p.required} onChange={e => updateParam(i, { required: e.target.checked })} />
                 required
               </label>
-              <button className="text-sm text-red-600 hover:cursor-pointer" onClick={() => removeParam(i)}>Remove</button>
+              <button className="text-sm text-red-600 hover:cursor-pointer justify-self-end" onClick={() => removeParam(i)}>
+                <svg height= "22" width="22" fill="#ef4444" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M5.755,20.283,4,8H20L18.245,20.283A2,2,0,0,1,16.265,22H7.735A2,2,0,0,1,5.755,20.283ZM21,4H16V3a1,1,0,0,0-1-1H9A1,1,0,0,0,8,3V4H3A1,1,0,0,0,3,6H21a1,1,0,0,0,0-2Z"></path></g></svg>
+              </button>
             </div>
           ))}
         </div>
@@ -124,7 +126,7 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
               className="text-sm underline hover:cursor-pointer"
               onClick={() => {
                 const newField: JsonField = {
-                  property: 'newField',
+                  property: '',
                   schemaType: 'string',
                   example: '',
                   description: '',
@@ -179,7 +181,7 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
                         ? 'Field is disabled for object and array types'
                         : ''
                     }
-                    value={String(field.example ?? '')}
+                    value={String(field.schemaType === 'object' || field.schemaType === 'array' ? '' : field.example)}
                     onChange={e => {
                       const copy = [...(value.requestBodyJsonFields || [])]
                       copy[i] = { ...field, example: e.target.value }
@@ -204,7 +206,7 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
                       onChange({ ...value, requestBodyJsonFields: copy })
                     }}
                   >
-                    Remove
+                    <svg height= "22" width="22" fill="#ef4444" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M5.755,20.283,4,8H20L18.245,20.283A2,2,0,0,1,16.265,22H7.735A2,2,0,0,1,5.755,20.283ZM21,4H16V3a1,1,0,0,0-1-1H9A1,1,0,0,0,8,3V4H3A1,1,0,0,0,3,6H21a1,1,0,0,0,0-2Z"></path></g></svg>
                   </button>
                 </div>
                   
@@ -219,7 +221,7 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
                           const copy = [...(value.requestBodyJsonFields || [])]
                           const children = field.children ? [...field.children] : []
                           children.push({
-                            property: 'childField',
+                            property: '',
                             schemaType: 'string',
                             example: '',
                             description: '',
@@ -236,7 +238,7 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
                       <div key={j} className="grid grid-cols-4 gap-2 items-center">
                         <input
                           className="p-1 border rounded"
-                          placeholder="child property"
+                          placeholder="property"
                           value={child.property}
                           onChange={e => {
                             const copy = [...(value.requestBodyJsonFields || [])]
@@ -279,7 +281,7 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
                               ? 'Field is disabled for object and array types'
                               : ''
                           }
-                          value={String(child.example ?? '')}
+                          value={String(child.schemaType === 'object' || child.schemaType === 'array' ? '' : child.example)}
                           onChange={e => {
                             const copy = [...(value.requestBodyJsonFields || [])]
                             const updatedChildren = [...(field.children || [])]
@@ -289,7 +291,7 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
                           }}
                         />
                         <button
-                          className="text-sm text-red-600 hover:cursor-pointer"
+                          className="text-sm text-red-600 hover:cursor-pointer justify-self-end"
                           onClick={() => {
                             const copy = [...(value.requestBodyJsonFields || [])]
                             const updatedChildren = [...(field.children || [])]
@@ -298,7 +300,7 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
                             onChange({ ...value, requestBodyJsonFields: copy })
                           }}
                         >
-                          Remove
+                          <svg height= "22" width="22" fill="#ef4444" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M5.755,20.283,4,8H20L18.245,20.283A2,2,0,0,1,16.265,22H7.735A2,2,0,0,1,5.755,20.283ZM21,4H16V3a1,1,0,0,0-1-1H9A1,1,0,0,0,8,3V4H3A1,1,0,0,0,3,6H21a1,1,0,0,0,0-2Z"></path></g></svg>
                         </button>
                       </div>
                     ))}
@@ -322,7 +324,9 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
             <div key={i} className="grid grid-cols-3 gap-2 items-center">
               <input className="p-1 border rounded" value={r.code} onChange={e => onChange({ ...value, responses: value.responses!.map((rr, idx) => idx === i ? { ...rr, code: e.target.value } : rr) })} />
               <input className="p-1 border rounded col-span-1" value={r.description} onChange={e => onChange({ ...value, responses: value.responses!.map((rr, idx) => idx === i ? { ...rr, description: e.target.value } : rr) })} />
-              <button className="text-sm text-red-600 hover:cursor-pointer" onClick={() => onChange({ ...value, responses: value.responses!.filter((_, idx) => idx !== i) })}>Remove</button>
+              <button className="text-sm text-red-600 hover:cursor-pointer justify-self-end mr-2" onClick={() => onChange({ ...value, responses: value.responses!.filter((_, idx) => idx !== i) })}>
+                <svg height= "22" width="22" fill="#ef4444" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M5.755,20.283,4,8H20L18.245,20.283A2,2,0,0,1,16.265,22H7.735A2,2,0,0,1,5.755,20.283ZM21,4H16V3a1,1,0,0,0-1-1H9A1,1,0,0,0,8,3V4H3A1,1,0,0,0,3,6H21a1,1,0,0,0,0-2Z"></path></g></svg>
+              </button>
             </div>
           ))}
         </div>
