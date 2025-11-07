@@ -1,4 +1,7 @@
-import type { Endpoint, Parameter, HttpMethod, ParamLocation, JsonField } from '../types/index'
+import type { Endpoint } from '../types/index'
+import { ParameterField } from './endpoint-form/ParameterField'
+import { JsonFieldEditor } from './endpoint-form/JsonFieldEditor'
+import { ResponseField } from './endpoint-form/ResponseField'
 
 interface Props {
   value: Endpoint
@@ -8,33 +11,30 @@ interface Props {
 
 export default function EndpointForm({ value, onChange, allowed }: Props) {
   const addParam = () => {
-    const p: Parameter = { name: 'new', in: allowed.path ? 'path' : allowed.query ? 'query' : 'header', required: false, schemaType: 'string', description: '' }
+    const p = { name: '', in: allowed.path ? 'path' : allowed.query ? 'query' : 'header', required: false, schemaType: 'string', description: '' }
     onChange({ ...value, parameters: [...(value.parameters || []), p] })
   }
 
-  const updateParam = (i: number, patch: Partial<Parameter>) => {
-    const copy = (value.parameters || []).slice()
-    copy[i] = { ...copy[i], ...patch }
-    onChange({ ...value, parameters: copy })
+  const addRequestBodyField = () => {
+    const field = { property: '', schemaType: 'string', example: '', description: '' }
+    onChange({ ...value, requestBodyJsonFields: [...(value.requestBodyJsonFields || []), field] })
   }
 
-  const removeParam = (i: number) => {
-    const copy = (value.parameters || []).slice()
-    copy.splice(i, 1)
-    onChange({ ...value, parameters: copy })
+  const addResponse = () => {
+    const resp = { code: '400', description: 'Bad request' }
+    onChange({ ...value, responses: [...(value.responses || []), resp] })
   }
-
-  const addResponse = () => onChange({ ...value, responses: [...(value.responses || []), { code: '400', description: 'Bad request' }] })
 
   return (
     <div className="p-4 space-y-4">
+      {/* Method & Path */}
       <div className="grid grid-cols-2 gap-2">
         <label className="flex flex-col">
           Method
           <select
             className="mt-1 p-2 rounded border"
             value={value.method}
-            onChange={e => onChange({ ...value, method: e.target.value as HttpMethod })}
+            onChange={e => onChange({ ...value, method: e.target.value as any })}
           >
             <option value="get">GET</option>
             <option value="post">POST</option>
@@ -43,42 +43,46 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
             <option value="delete">DELETE</option>
           </select>
         </label>
-
         <label className="flex flex-col">
           Path
-          <input className="mt-1 p-2 rounded border" value={value.path} onChange={e => onChange({ ...value, path: e.target.value })} />
+          <input 
+            className="mt-1 p-2 rounded border" 
+            value={value.path} 
+            onChange={e => onChange({ ...value, path: e.target.value })} />
         </label>
       </div>
 
       {/* Security */}
       <div className="flex items-center gap-4">
         <label className="flex items-center gap-2">
-          <input type="checkbox" checked={!!value.security?.bearer} onChange={e => onChange({ ...value, security: { bearer: e.target.checked } })} />
+          <input
+            type="checkbox"
+            checked={!!value.security?.bearer}
+            onChange={e => onChange({ ...value, security: { bearer: e.target.checked } })}
+          />
           Bearer (Sanctum)
-          {/* TODO: should be able to use other security options */}
         </label>
       </div>
 
-      <label className="flex flex-col">
-        Operation ID
-        <input className="mt-1 p-2 rounded border" value={value.operationId} onChange={e => onChange({ ...value, operationId: e.target.value })} />
-      </label>
-
-      <label className="flex flex-col">
-        Tags
-        <input className="mt-1 p-2 rounded border" value={value.tags} onChange={e => onChange({ ...value, tags: e.target.value })} />
-      </label>
-
-
-      <label className="flex flex-col">
-        Summary
-        <input className="mt-1 p-2 rounded border" value={value.summary} onChange={e => onChange({ ...value, summary: e.target.value })} />
-      </label>
-
-      <label className="flex flex-col">
-        Description
-        <textarea className="mt-1 p-2 rounded border" value={value.description} onChange={e => onChange({ ...value, description: e.target.value })} />
-      </label>
+      {/* Basic Info */}
+      {['operationId', 'tags', 'summary', 'description'].map((field) => (
+        <label className="flex flex-col" key={field}>
+          {field.charAt(0).toUpperCase() + field.slice(1)}
+          {field === 'description' ? (
+            <textarea
+              className="mt-1 p-2 rounded border"
+              value={value[field as keyof Endpoint] as string || ''}
+              onChange={e => onChange({ ...value, [field]: e.target.value })}
+            />
+          ) : (
+            <input
+              className="mt-1 p-2 rounded border"
+              value={value[field as keyof Endpoint] as string || ''}
+              onChange={e => onChange({ ...value, [field]: e.target.value })}
+            />
+          )}
+        </label>
+      ))}
 
       {/* Parameters */}
       <div>
@@ -90,29 +94,19 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
           {(value.parameters || []).filter(p => {
             if (p.in === 'path') return allowed.path
             if (p.in === 'query') return allowed.query
-            return true // header always shown
+            return true
           }).map((p, i) => (
-            <div key={i} className="p-2 border rounded grid grid-cols-6 gap-2 items-center">
-              <input className="col-span-2 p-1 border rounded" value={p.name} onChange={e => updateParam(i, { name: e.target.value })} />
-              <select className="p-1 border rounded" value={p.in} onChange={e => updateParam(i, { in: e.target.value as ParamLocation })}>
-                {allowed.path && <option value="path">path</option>}
-                {allowed.query && <option value="query">query</option>}
-                <option value="header">header</option>
-              </select>
-              <select className="p-1 border rounded" value={p.schemaType} onChange={e => updateParam(i, { schemaType: e.target.value as any })}>
-                <option value="string">string</option>
-                <option value="integer">integer</option>
-                <option value="boolean">boolean</option>
-                <option value="number">number</option>
-              </select>
-              <label className="flex items-center gap-2">
-                <input type="checkbox" checked={!!p.required} onChange={e => updateParam(i, { required: e.target.checked })} />
-                required
-              </label>
-              <button className="text-sm text-red-600 hover:cursor-pointer justify-self-end" onClick={() => removeParam(i)}>
-                <svg height= "22" width="22" fill="#ef4444" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M5.755,20.283,4,8H20L18.245,20.283A2,2,0,0,1,16.265,22H7.735A2,2,0,0,1,5.755,20.283ZM21,4H16V3a1,1,0,0,0-1-1H9A1,1,0,0,0,8,3V4H3A1,1,0,0,0,3,6H21a1,1,0,0,0,0-2Z"></path></g></svg>
-              </button>
-            </div>
+            <ParameterField
+              key={i}
+              parameter={p}
+              allowed={allowed}
+              onChange={updated => {
+                const copy = [...(value.parameters || [])]
+                copy[i] = updated
+                onChange({ ...value, parameters: copy })
+              }}
+              onRemove={() => onChange({ ...value, parameters: (value.parameters || []).filter((_, idx) => idx !== i) })}
+            />
           ))}
         </div>
       </div>
@@ -121,197 +115,38 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
       {allowed.body && (
         <div>
           <div className="flex items-center justify-between">
-            <h4 className="font-medium">Request Body (application/json)</h4>
-            <button
-              className="text-sm underline hover:cursor-pointer"
-              onClick={() => {
-                const newField: JsonField = {
-                  property: '',
-                  schemaType: 'string',
-                  example: '',
-                  description: '',
-                }
-                onChange({ ...value, requestBodyJsonFields: [...(value.requestBodyJsonFields || []), newField] })
-              }}
-            >
+            <div className="flex items-center gap-2">
+              <h4 className="font-medium">Request Body</h4>
+              <select 
+                className="border rounded p-1 text-sm"
+                // value={selectedContentType}
+                // onChange={(e) => setSelectedContentType(e.target.value)}
+              >
+                <option value="application/json">application/json</option>
+                <option value="multipart/form-data">multipart/form-data</option>
+              </select>
+              <span className="text-xs text-orange-300">coming soon</span>
+            </div>
+            <button className="text-sm underline hover:cursor-pointer" onClick={addRequestBodyField}>
               Add field
             </button>
           </div>
-            
           <div className="space-y-2 mt-2">
-            {(value.requestBodyJsonFields || []).map((field, i) => (
-              <div key={i} className="p-2 border rounded space-y-2">
-                <div className="grid grid-cols-5 gap-2 items-center">
-                  <input
-                    className="p-1 border rounded"
-                    placeholder="property"
-                    value={field.property}
-                    onChange={e => {
-                      const copy = [...(value.requestBodyJsonFields || [])]
-                      copy[i] = { ...field, property: e.target.value }
-                      onChange({ ...value, requestBodyJsonFields: copy })
-                    }}
-                  />
-                  <select
-                    className="p-1 border rounded"
-                    value={field.schemaType || 'string'}
-                    onChange={e => {
-                      const copy = [...(value.requestBodyJsonFields || [])]
-                      copy[i] = { ...field, schemaType: e.target.value as any }
-                      onChange({ ...value, requestBodyJsonFields: copy })
-                    }}
-                  >
-                    <option value="string">string</option>
-                    <option value="integer">integer</option>
-                    <option value="boolean">boolean</option>
-                    <option value="number">number</option>
-                    <option value="array">array</option>
-                    <option value="object">object</option>
-                  </select>
-                  <input
-                    className={`p-1 border rounded ${field.schemaType === 'object' || field.schemaType === 'array' ? 'cursor-not-allowed' : ''}`}
-                    placeholder={
-                      field.schemaType === 'object' || field.schemaType === 'array'
-                        ? 'disabled'
-                        : 'example'
-                    }
-                    disabled={field.schemaType === 'object' || field.schemaType === 'array'}
-                    title={
-                      field.schemaType === 'object' || field.schemaType === 'array'
-                        ? 'Field is disabled for object and array types'
-                        : ''
-                    }
-                    value={String(field.schemaType === 'object' || field.schemaType === 'array' ? '' : field.example)}
-                    onChange={e => {
-                      const copy = [...(value.requestBodyJsonFields || [])]
-                      copy[i] = { ...field, example: e.target.value }
-                      onChange({ ...value, requestBodyJsonFields: copy })
-                    }}
-                  />
-                  <input
-                    className="p-1 border rounded"
-                    placeholder="description"
-                    value={field.description ?? ''}
-                    onChange={e => {
-                      const copy = [...(value.requestBodyJsonFields || [])]
-                      copy[i] = { ...field, description: e.target.value }
-                      onChange({ ...value, requestBodyJsonFields: copy })
-                    }}
-                  />
-                  <button
-                    className="text-sm text-red-600 hover:cursor-pointer justify-self-end"
-                    onClick={() => {
-                      const copy = [...(value.requestBodyJsonFields || [])]
-                      copy.splice(i, 1)
-                      onChange({ ...value, requestBodyJsonFields: copy })
-                    }}
-                  >
-                    <svg height= "22" width="22" fill="#ef4444" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M5.755,20.283,4,8H20L18.245,20.283A2,2,0,0,1,16.265,22H7.735A2,2,0,0,1,5.755,20.283ZM21,4H16V3a1,1,0,0,0-1-1H9A1,1,0,0,0,8,3V4H3A1,1,0,0,0,3,6H21a1,1,0,0,0,0-2Z"></path></g></svg>
-                  </button>
-                </div>
-                  
-                {/* Recursive child fields if array/object */}
-                {(field.schemaType === 'array' || field.schemaType === 'object') && (
-                  <div className="ml-4 border-l pl-4 space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Children</span>
-                      <button
-                        className="text-sm underline hover:cursor-pointer"
-                        onClick={() => {
-                          const copy = [...(value.requestBodyJsonFields || [])]
-                          const children = field.children ? [...field.children] : []
-                          children.push({
-                            property: '',
-                            schemaType: 'string',
-                            example: '',
-                            description: '',
-                          })
-                          copy[i] = { ...field, children }
-                          onChange({ ...value, requestBodyJsonFields: copy })
-                        }}
-                      >
-                        Add child
-                      </button>
-                    </div>
-                      
-                    {(field.children || []).map((child, j) => (
-                      <div key={j} className="grid grid-cols-4 gap-2 items-center">
-                        <input
-                          className="p-1 border rounded"
-                          placeholder="property"
-                          value={child.property}
-                          onChange={e => {
-                            const copy = [...(value.requestBodyJsonFields || [])]
-                            const updatedChildren = [...(field.children || [])]
-                            updatedChildren[j] = { ...child, property: e.target.value }
-                            copy[i] = { ...field, children: updatedChildren }
-                            onChange({ ...value, requestBodyJsonFields: copy })
-                          }}
-                        />
-                        <select
-                          className="p-1 border rounded"
-                          value={child.schemaType || 'string'}
-                          onChange={e => {
-                            const copy = [...(value.requestBodyJsonFields || [])]
-                            const updatedChildren = [...(field.children || [])]
-                            updatedChildren[j] = { ...child, schemaType: e.target.value as any }
-                            copy[i] = { ...field, children: updatedChildren }
-                            onChange({ ...value, requestBodyJsonFields: copy })
-                          }}
-                        >
-                          <option value="string">string</option>
-                          <option value="integer">integer</option>
-                          <option value="boolean">boolean</option>
-                          <option value="number">number</option>
-                          {/* 
-                          <option value="array">array</option>
-                          <option value="object">object</option>
-                           */}
-                        </select>
-                        <input
-                          className={`p-1 border rounded ${child.schemaType === 'object' || child.schemaType === 'array' ? 'cursor-not-allowed' : ''}`}
-                          placeholder={
-                            child.schemaType === 'object' || child.schemaType === 'array'
-                              ? 'disabled'
-                              : 'example'
-                          }
-                          disabled={child.schemaType === 'object' || child.schemaType === 'array'}
-                          title={
-                            child.schemaType === 'object' || child.schemaType === 'array'
-                              ? 'Field is disabled for object and array types'
-                              : ''
-                          }
-                          value={String(child.schemaType === 'object' || child.schemaType === 'array' ? '' : child.example)}
-                          onChange={e => {
-                            const copy = [...(value.requestBodyJsonFields || [])]
-                            const updatedChildren = [...(field.children || [])]
-                            updatedChildren[j] = { ...child, example: e.target.value }
-                            copy[i] = { ...field, children: updatedChildren }
-                            onChange({ ...value, requestBodyJsonFields: copy })
-                          }}
-                        />
-                        <button
-                          className="text-sm text-red-600 hover:cursor-pointer justify-self-end"
-                          onClick={() => {
-                            const copy = [...(value.requestBodyJsonFields || [])]
-                            const updatedChildren = [...(field.children || [])]
-                            updatedChildren.splice(j, 1)
-                            copy[i] = { ...field, children: updatedChildren }
-                            onChange({ ...value, requestBodyJsonFields: copy })
-                          }}
-                        >
-                          <svg height= "22" width="22" fill="#ef4444" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M5.755,20.283,4,8H20L18.245,20.283A2,2,0,0,1,16.265,22H7.735A2,2,0,0,1,5.755,20.283ZM21,4H16V3a1,1,0,0,0-1-1H9A1,1,0,0,0,8,3V4H3A1,1,0,0,0,3,6H21a1,1,0,0,0,0-2Z"></path></g></svg>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+            {(value.requestBodyJsonFields || []).map((f, i) => (
+              <JsonFieldEditor
+                key={i}
+                field={f}
+                onChange={updated => {
+                  const copy = [...(value.requestBodyJsonFields || [])]
+                  copy[i] = updated
+                  onChange({ ...value, requestBodyJsonFields: copy })
+                }}
+                onRemove={() => onChange({ ...value, requestBodyJsonFields: (value.requestBodyJsonFields || []).filter((_, idx) => idx !== i) })}
+              />
             ))}
           </div>
         </div>
       )}
-
 
       {/* Responses */}
       <div>
@@ -321,17 +156,19 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
         </div>
         <div className="space-y-2 mt-2">
           {(value.responses || []).map((r, i) => (
-            <div key={i} className="grid grid-cols-3 gap-2 items-center">
-              <input className="p-1 border rounded" value={r.code} onChange={e => onChange({ ...value, responses: value.responses!.map((rr, idx) => idx === i ? { ...rr, code: e.target.value } : rr) })} />
-              <input className="p-1 border rounded col-span-1" value={r.description} onChange={e => onChange({ ...value, responses: value.responses!.map((rr, idx) => idx === i ? { ...rr, description: e.target.value } : rr) })} />
-              <button className="text-sm text-red-600 hover:cursor-pointer justify-self-end mr-2" onClick={() => onChange({ ...value, responses: value.responses!.filter((_, idx) => idx !== i) })}>
-                <svg height= "22" width="22" fill="#ef4444" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M5.755,20.283,4,8H20L18.245,20.283A2,2,0,0,1,16.265,22H7.735A2,2,0,0,1,5.755,20.283ZM21,4H16V3a1,1,0,0,0-1-1H9A1,1,0,0,0,8,3V4H3A1,1,0,0,0,3,6H21a1,1,0,0,0,0-2Z"></path></g></svg>
-              </button>
-            </div>
+            <ResponseField
+              key={i}
+              response={r}
+              onChange={updated => {
+                const copy = [...(value.responses || [])]
+                copy[i] = updated
+                onChange({ ...value, responses: copy })
+              }}
+              onRemove={() => onChange({ ...value, responses: (value.responses || []).filter((_, idx) => idx !== i) })}
+            />
           ))}
         </div>
       </div>
-
     </div>
   )
 }

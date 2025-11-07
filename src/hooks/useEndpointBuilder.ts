@@ -26,7 +26,7 @@ export function useEndpointBuilder() {
         description: 'Returns created item data',
         parameters: [],
         requestBodyJsonFields: [
-            { property: 'item', schemaType: 'string', example: "test api", description: 'endpoint' }
+            { property: 'name', schemaType: 'string', example: "apple", description: 'fruit' }
         ],
         responses: [{ code: '200', description: 'Success' }],
         security: { bearer: false },
