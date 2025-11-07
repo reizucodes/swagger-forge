@@ -65,7 +65,7 @@ export function JsonFieldEditor({ field, onChange, onRemove }: Props) {
                         <button
                             className="text-sm underline hover:cursor-pointer"
                             onClick={() => {
-                                const children = [...(field.children || []), { property: '', schemaType: 'string', example: '', description: '' }]
+                                const children: JsonField[] = [...(field.children || []), { property: '', schemaType: 'string', example: '', description: '' }]
                                 onChange({ ...field, children })
                             }}
                         >
