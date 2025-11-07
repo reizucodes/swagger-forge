@@ -1,4 +1,4 @@
-import type { Endpoint } from '../types/index'
+import type { Endpoint, Parameter, JsonField } from '../types/index'
 import { ParameterField } from './endpoint-form/ParameterField'
 import { JsonFieldEditor } from './endpoint-form/JsonFieldEditor'
 import { ResponseField } from './endpoint-form/ResponseField'
@@ -11,12 +11,12 @@ interface Props {
 
 export default function EndpointForm({ value, onChange, allowed }: Props) {
   const addParam = () => {
-    const p = { name: '', in: allowed.path ? 'path' : allowed.query ? 'query' : 'header', required: false, schemaType: 'string', description: '' }
+    const p: Parameter = { name: '', in: allowed.path ? 'path' : allowed.query ? 'query' : 'header', required: false, schemaType: 'string', description: '' }
     onChange({ ...value, parameters: [...(value.parameters || []), p] })
   }
 
   const addRequestBodyField = () => {
-    const field = { property: '', schemaType: 'string', example: '', description: '' }
+    const field: JsonField = { property: '', schemaType: 'string', example: '', description: '' }
     onChange({ ...value, requestBodyJsonFields: [...(value.requestBodyJsonFields || []), field] })
   }
 
