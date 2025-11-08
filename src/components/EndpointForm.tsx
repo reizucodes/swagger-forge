@@ -123,7 +123,7 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
                 // onChange={(e) => setSelectedContentType(e.target.value)}
               >
                 <option value="application/json">application/json</option>
-                <option value="multipart/form-data">multipart/form-data</option>
+                {/* <option value="multipart/form-data">multipart/form-data</option> */}
               </select>
               <span className="text-xs text-orange-300">coming soon</span>
             </div>
