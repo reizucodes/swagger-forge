@@ -9,7 +9,7 @@ interface Props {
 
 export function ParameterField({ parameter, allowed, onChange, onRemove }: Props) {
     return (
-        <div className="p-2 border rounded grid grid-cols-6 gap-2 items-center">
+        <div className="p-2 border rounded grid gap-2 items-center">
             {/* Name */}
             <input
                 className="col-span-2 p-1 border rounded"
