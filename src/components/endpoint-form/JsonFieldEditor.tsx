@@ -1,12 +1,13 @@
-import type { JsonField } from '../../types/index'
+import type { JsonField, RequestBodyContentType } from '../../types/index'
 
 interface Props {
     field: JsonField
     onChange: (f: JsonField) => void
     onRemove: () => void
+    contentType?: RequestBodyContentType
 }
 
-export function JsonFieldEditor({ field, onChange, onRemove }: Props) {
+export function JsonFieldEditor({ field, onChange, onRemove, contentType }: Props) {
     const updateChild = (i: number, patch: Partial<JsonField>) => {
         const children = [...(field.children || [])]
         children[i] = { ...children[i], ...patch }
@@ -18,6 +19,22 @@ export function JsonFieldEditor({ field, onChange, onRemove }: Props) {
         children.splice(i, 1)
         onChange({ ...field, children })
     }
+
+    const schemaTypes = [
+        'string',
+        'integer',
+        'boolean',
+        'number',
+        'array',
+        'object',
+        ...(contentType === 'multipart/form-data' ? ['file'] : []),
+    ]
+
+    const filteredSchemaTypes = contentType === "multipart/form-data"
+            ? schemaTypes.filter(type => type !== "array" && type !== "object")
+            : schemaTypes;
+
+    const isFieldDisabled = field.schemaType === 'object' || field.schemaType === 'array' || field.schemaType === 'file'
 
     return (
         <div className="p-2 border rounded space-y-2">
@@ -33,18 +50,17 @@ export function JsonFieldEditor({ field, onChange, onRemove }: Props) {
                     value={field.schemaType || 'string'}
                     onChange={e => onChange({ ...field, schemaType: e.target.value as any })}
                 >
-                    <option value="string">string</option>
-                    <option value="integer">integer</option>
-                    <option value="boolean">boolean</option>
-                    <option value="number">number</option>
-                    <option value="array">array</option>
-                    <option value="object">object</option>
+                    {filteredSchemaTypes.map(type => (
+                        <option key={type} value={type}>
+                            {type}
+                        </option>
+                    ))}
                 </select>
                 <input
                     className={`p-1 border rounded ${field.schemaType === 'object' || field.schemaType === 'array' ? 'cursor-not-allowed' : ''}`}
-                    placeholder={field.schemaType === 'object' || field.schemaType === 'array' ? 'disabled' : 'example'}
-                    disabled={field.schemaType === 'object' || field.schemaType === 'array'}
-                    value={String(field.schemaType === 'object' || field.schemaType === 'array' ? '' : field.example)}
+                    placeholder={isFieldDisabled ? 'disabled' : 'example'}
+                    disabled={isFieldDisabled}
+                    value={String(isFieldDisabled ? '' : field.example)}
                     onChange={e => onChange({ ...field, example: e.target.value })}
                 />
                 <input
@@ -54,7 +70,7 @@ export function JsonFieldEditor({ field, onChange, onRemove }: Props) {
                     onChange={e => onChange({ ...field, description: e.target.value })}
                 />
                 <button className="text-sm text-red-600 hover:cursor-pointer justify-self-end" onClick={onRemove}>
-                    <svg height= "22" width="22" fill="#ef4444" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M5.755,20.283,4,8H20L18.245,20.283A2,2,0,0,1,16.265,22H7.735A2,2,0,0,1,5.755,20.283ZM21,4H16V3a1,1,0,0,0-1-1H9A1,1,0,0,0,8,3V4H3A1,1,0,0,0,3,6H21a1,1,0,0,0,0-2Z"></path></g></svg>
+                    <svg height= "22" width="22" fill="#ef4444" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M5.755,20.283,4,8H20L18.245,20.283A2,2,0,0,1,16.265,22H7.735A2,2,0,0,1,5.755,20.283ZM21,4H16V3a1,1,0,0,0-1-1H9A1,1,0,0,0,8,3V4H3A1,1,0,0,0,3,6H21a1,1,0,0,0,0-2Z"></path></g></svg>
                 </button>
             </div>
 
@@ -78,9 +94,11 @@ export function JsonFieldEditor({ field, onChange, onRemove }: Props) {
                             field={child}
                             onChange={updated => updateChild(i, updated)}
                             onRemove={() => removeChild(i)}
+                            contentType={contentType}
                         />
                     ))}
                 </div>
             )}
         </div>
-)}
+    )
+}

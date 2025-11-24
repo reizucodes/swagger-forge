@@ -35,13 +35,36 @@ export function generateOaAnnotation(e: Endpoint): string {
     if (e.method !== 'get' && e.requestBodyJsonFields?.length) {
         lines.push(`*${indent(2)}@OA\\RequestBody(`)
         lines.push(`*${indent(3)}required=true,`)
-        lines.push(`*${indent(3)}@OA\\JsonContent(`)
 
-        e.requestBodyJsonFields.forEach((f) => {
-            lines.push(...renderJsonField(f, 4))
-        })
+        // Decide which OpenAPI annotation to use based on content type
+        if (e.requestBodyContentType === 'application/json') {
+            lines.push(`*${indent(3)}@OA\\JsonContent(`)
+            e.requestBodyJsonFields.forEach((f) => {
+                lines.push(...renderJsonField(f, 4))
+            })
+            lines.push(`*${indent(3)}),`)
+        } else if (e.requestBodyContentType === 'multipart/form-data') {
+            lines.push(`*${indent(3)}@OA\\MediaType(`)
+            lines.push(`*${indent(4)}mediaType="multipart/form-data",`)
+            lines.push(`*${indent(4)}@OA\\Schema(`)
 
-        lines.push(`*${indent(3)}),`)
+            e.requestBodyJsonFields.forEach((f) => {
+                lines.push(...renderJsonField(f, 5))
+            })
+
+            lines.push(`*${indent(4)}),`)
+            lines.push(`*${indent(3)}),`)
+
+        } else {
+            // Fallback (optional)
+            // TODO add support for x-www-form-urlencoded format
+            lines.push(`*${indent(3)}@OA\\JsonContent(`)
+            e.requestBodyJsonFields.forEach((f) => {
+                lines.push(...renderJsonField(f, 4))
+            })
+            lines.push(`*${indent(3)}),`)
+        }
+
         lines.push(`*${indent(2)}),`)
     }
 
@@ -71,11 +94,14 @@ export function generateOaAnnotation(e: Endpoint): string {
 function renderJsonField(field: JsonField, depth = 3): string[] {
     const pad = indent(depth)
     const lines: string[] = []
-    const type = field.schemaType ?? 'string'
+    const type = field.schemaType === 'file' ? 'string' : (field.schemaType ?? 'string')
 
     lines.push(`*${pad}@OA\\Property(`)
-    if (field.property) lines.push(`*${pad}${indent(1)}property="${escapeForPhpString(field.property)}",`)
-        lines.push(`*${pad}${indent(1)}type="${type}",`)
+    if (field.property) 
+        lines.push(`*${pad}${indent(1)}property="${escapeForPhpString(field.property)}",`)
+    if (field.schemaType === 'file')
+        lines.push(`*${pad}${indent(1)}format="binary",`)
+    lines.push(`*${pad}${indent(1)}type="${type}",`)
     if (field.description)
         lines.push(`*${pad}${indent(1)}description="${escapeForPhpString(field.description)}",`)
     if (
@@ -83,13 +109,18 @@ function renderJsonField(field: JsonField, depth = 3): string[] {
         field.example !== null && 
         field.example !== '' && 
         field.schemaType !== 'object' && 
-        field.schemaType !== 'array'
+        field.schemaType !== 'array' && 
+        field.schemaType !== 'file'
     )
         lines.push(`*${pad}${indent(1)}example="${escapeForPhpString(String(field.example))}",`)
 
   // === Recursive logic ===
     if (field.children?.length) {
+        console.log("f: ",  field)
         if (type === 'array') {
+            // TODO
+            // primitive array [1,2,3]
+            // array of objects [[1], [2], [3]]
             // array of primitives or array of objects
             lines.push(`*${pad}${indent(1)}@OA\\Items(`)
             field.children.forEach((child) => {

@@ -24,10 +24,13 @@ export function useEndpointBuilder() {
         tags: 'Swagger API',
         summary: 'Create Swagger Item',
         description: 'Returns created item data',
-        parameters: [],
+        parameters: [
+            {name: '', in: 'query', required: false, schemaType:'string', description: ''}
+        ],
         requestBodyJsonFields: [
             { property: 'name', schemaType: 'string', example: "apple", description: 'fruit' }
         ],
+        requestBodyContentType: 'application/json',
         responses: [{ code: '200', description: 'Success' }],
         security: { bearer: false },
     })

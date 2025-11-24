@@ -60,7 +60,9 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
             checked={!!value.security?.bearer}
             onChange={e => onChange({ ...value, security: { bearer: e.target.checked } })}
           />
+          {/* TODO add support for other security types */}
           Bearer (Sanctum)
+          <span className="text-xs text-orange-300">other security types suppport coming soon</span>
         </label>
       </div>
 
@@ -119,11 +121,11 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
               <h4 className="font-medium">Request Body</h4>
               <select 
                 className="border rounded p-1 text-sm"
-                // value={selectedContentType}
-                // onChange={(e) => setSelectedContentType(e.target.value)}
+                value={value.requestBodyContentType}
+                onChange={e => onChange({...value, requestBodyContentType: e.target.value as any})}
               >
                 <option value="application/json">application/json</option>
-                {/* <option value="multipart/form-data">multipart/form-data</option> */}
+                <option value="multipart/form-data">multipart/form-data</option>
               </select>
               <span className="text-xs text-orange-300">coming soon</span>
             </div>
@@ -142,6 +144,7 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
                   onChange({ ...value, requestBodyJsonFields: copy })
                 }}
                 onRemove={() => onChange({ ...value, requestBodyJsonFields: (value.requestBodyJsonFields || []).filter((_, idx) => idx !== i) })}
+                contentType={value.requestBodyContentType}
               />
             ))}
           </div>
