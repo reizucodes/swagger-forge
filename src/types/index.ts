@@ -17,6 +17,7 @@ export type SchemaType =
   | 'number'
   | 'array'
   | 'object'
+  | 'file'
 
 export interface JsonField {
   property: string
@@ -25,6 +26,12 @@ export interface JsonField {
   description?: string
   children?: JsonField[] // nested fields for arrays/objects
 }
+
+export type RequestBodyContentType =
+  | 'application/json'
+  | 'multipart/form-data'
+  | 'application/x-www-form-urlencoded'
+
 
 export interface ResponseDef {
   code?: string // optional - generator will supply default if missing
@@ -41,6 +48,7 @@ export interface Endpoint {
   description?: string
   parameters?: Parameter[]
   requestBodyJsonFields?: JsonField[] // per-field schema
+  requestBodyContentType?: RequestBodyContentType
   responses?: ResponseDef[]
   security?: { bearer?: boolean }
 }

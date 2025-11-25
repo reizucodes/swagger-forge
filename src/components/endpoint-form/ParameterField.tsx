@@ -15,7 +15,7 @@ export function ParameterField({ parameter, allowed, onChange, onRemove }: Props
                 className="col-span-2 p-1 border rounded"
                 value={parameter.name}
                 onChange={e => onChange({ ...parameter, name: e.target.value })}
-                placeholder="query"
+                placeholder="field"
             />
 
             {/* Parameter Location */}

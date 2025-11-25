@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import type { Endpoint, HttpMethod, Parameter, ResponseDef, JsonField } from '../types/index'
+import { EMPTY_ENDPOINT } from '../constants/endpoint';
+
 
 function getAllowedSections(method: HttpMethod) {
     switch (method) {
@@ -17,20 +19,7 @@ function getAllowedSections(method: HttpMethod) {
 }
 
 export function useEndpointBuilder() {
-    const [endpoint, setEndpoint] = useState<Endpoint>({
-        method: 'post',
-        path: '/swagger/create',
-        operationId: 'createSwagger',
-        tags: 'Swagger API',
-        summary: 'Create Swagger Item',
-        description: 'Returns created item data',
-        parameters: [],
-        requestBodyJsonFields: [
-            { property: 'name', schemaType: 'string', example: "apple", description: 'fruit' }
-        ],
-        responses: [{ code: '200', description: 'Success' }],
-        security: { bearer: false },
-    })
+    const [endpoint, setEndpoint] = useState<Endpoint>(EMPTY_ENDPOINT)
 
     const allowed = getAllowedSections(endpoint.method)
 
