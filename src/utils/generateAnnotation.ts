@@ -94,7 +94,23 @@ export function generateOaAnnotation(e: Endpoint): string {
 function renderJsonField(field: JsonField, depth = 3): string[] {
     const pad = indent(depth)
     const lines: string[] = []
-    const type = field.schemaType === 'file' ? 'string' : (field.schemaType ?? 'string')
+    const isPrimitiveArray =
+        field.schemaType === 'array' &&
+        field.example !== undefined &&
+        field.example !== null &&
+        field.example !== ''
+
+    const type = 
+        (field.schemaType === 'file' || isPrimitiveArray)
+            ? 'string'
+            : (field.schemaType ?? 'string');
+
+    const shouldRenderExample =
+            field.example !== undefined &&
+            field.example !== null &&
+            field.example !== '' &&
+            field.schemaType !== 'object' &&
+            field.schemaType !== 'file';
 
     lines.push(`*${pad}@OA\\Property(`)
     if (field.property) 
@@ -104,40 +120,35 @@ function renderJsonField(field: JsonField, depth = 3): string[] {
     lines.push(`*${pad}${indent(1)}type="${type}",`)
     if (field.description)
         lines.push(`*${pad}${indent(1)}description="${escapeForPhpString(field.description)}",`)
-    if (
-        field.example !== undefined && 
-        field.example !== null && 
-        field.example !== '' && 
-        field.schemaType !== 'object' && 
-        field.schemaType !== 'array' && 
-        field.schemaType !== 'file'
-    )
-        lines.push(`*${pad}${indent(1)}example="${escapeForPhpString(String(field.example))}",`)
+    
+    if (shouldRenderExample) {
+        if (isPrimitiveArray) {
+            let raw = String(field.example)
+                .replace(/[\[\]]/g, '')   // remove [ ]
+                .split(',')
+                .map(v => v.trim())
+                .filter(v => v !== '');
+
+            // detect if array is numeric
+            const allNumbers = raw.every(v => !isNaN(Number(v)));
+            // format values per type
+            const formatted = raw.map(v => {
+                if (allNumbers) return v;             // e.g. 1 → 1
+                return `"${escapeForPhpString(v)}"`;  // e.g. hello → "hello"
+            });
+
+            lines.push(`*${pad}${indent(1)}example={${formatted.join(',')}},`);
+        } else {
+            lines.push(`*${pad}${indent(1)}example="${escapeForPhpString(String(field.example))}",`
+            );
+        }
+    }
 
   // === Recursive logic ===
     if (field.children?.length) {
-        console.log("f: ",  field)
         if (type === 'array') {
-            // TODO
-            // primitive array [1,2,3]
-            // array of objects [[1], [2], [3]]
-            // array of primitives or array of objects
             lines.push(`*${pad}${indent(1)}@OA\\Items(`)
             field.children.forEach((child) => {
-                // const isPrimitive = !child.children?.length && child.schemaType !== 'object'
-                // if (isPrimitive) {
-                //     lines.push(`*${pad}${indent(2)}type="${child.schemaType ?? 'string'}",`)
-                //     if (
-                //     child.example !== undefined && 
-                //     child.example !== null && 
-                //     child.example !== '' && 
-                //     child.schemaType !== 'object' && 
-                //     child.schemaType !== 'array'
-                //     )
-                //     lines.push(`*${pad}${indent(2)}example="${escapeForPhpString(String(child.example))}",`)
-                // } else {
-                //     lines.push(...renderJsonField(child, depth + 2))
-                // }
                 lines.push(...renderJsonField(child, depth + 2))
             })
             lines.push(`*${pad}${indent(1)}),`)

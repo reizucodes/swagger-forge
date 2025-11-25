@@ -1,7 +1,15 @@
+import { useState } from 'react'
 import type { Endpoint, Parameter, JsonField } from '../types/index'
 import { ParameterField } from './endpoint-form/ParameterField'
 import { JsonFieldEditor } from './endpoint-form/JsonFieldEditor'
 import { ResponseField } from './endpoint-form/ResponseField'
+import { EMPTY_ENDPOINT } from '../constants/endpoint'
+import { SAMPLE_ENDPOINTS } from '../constants/endpoint'
+import { JsonPreviewModal } from './modals/JsonPreviewModal'
+import { JsonImportModal } from './modals/JsonImportModal'
+import { jsonFieldToObject } from '../utils/jsonFieldToObject'
+import { objectToJsonField } from '../utils/objectJsonToField'
+import { flattenJsonFields } from '../utils/flattenJsonFields'
 
 interface Props {
   value: Endpoint
@@ -25,8 +33,49 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
     onChange({ ...value, responses: [...(value.responses || []), resp] })
   }
 
+  const [showJsonModal, setShowJsonModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+
+
   return (
     <div className="p-4 space-y-4">
+      <div className="flex items-center justify-between mb-4">
+        {/* Sample Request Selector */}
+        <select
+          className="p-2 border rounded text-sm"
+          onChange={(e) => {
+            const key = e.target.value;
+            if (!key) return;
+            const sample = key.startsWith("json:")
+              ? SAMPLE_ENDPOINTS.json[key.replace("json:", "")]
+              : SAMPLE_ENDPOINTS.formData[key.replace("form:", "")];
+            if (sample) onChange(sample);
+          }}
+        >
+          <option value="">Sample Requests</option>
+          <optgroup label="application/json">
+            {Object.keys(SAMPLE_ENDPOINTS.json).map(key => (
+              <option key={key} value={`json:${key}`}>
+                {key}
+              </option>
+            ))}
+          </optgroup>
+          <optgroup label="multipart/form-data">
+            {Object.keys(SAMPLE_ENDPOINTS.formData).map(key => (
+              <option key={key} value={`form:${key}`}>
+                {key}
+              </option>
+            ))}
+          </optgroup>
+        </select>
+        {/* Clear Button */}
+        <button
+          className="text-sm underline text-red-400 hover:cursor-pointer"
+          onClick={() => onChange(EMPTY_ENDPOINT)}
+        >
+          Reset
+        </button>
+      </div>
       {/* Method & Path */}
       <div className="grid grid-cols-2 gap-2">
         <label className="flex flex-col">
@@ -44,10 +93,13 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
           </select>
         </label>
         <label className="flex flex-col">
-          Path
+          <div className="flex items-center justify-between">
+            <span>Path</span>
+          </div>
           <input 
             className="mt-1 p-2 rounded border" 
             value={value.path} 
+            placeholder='/sample/path'
             onChange={e => onChange({ ...value, path: e.target.value })} />
         </label>
       </div>
@@ -61,8 +113,8 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
             onChange={e => onChange({ ...value, security: { bearer: e.target.checked } })}
           />
           {/* TODO add support for other security types */}
-          Bearer (Sanctum)
-          <span className="text-xs text-orange-300">other security types suppport coming soon</span>
+          Auth (Sanctum)
+          <span className="text-xs text-orange-300">more security types soon</span>
         </label>
       </div>
 
@@ -122,12 +174,34 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
               <select 
                 className="border rounded p-1 text-sm"
                 value={value.requestBodyContentType}
-                onChange={e => onChange({...value, requestBodyContentType: e.target.value as any})}
+                onChange={e => onChange({
+                  ...value, 
+                  requestBodyContentType: e.target.value as any, 
+                  requestBodyJsonFields:  e.target.value === "multipart/form-data"
+                                            ? flattenJsonFields(value.requestBodyJsonFields || [])
+                                            : value.requestBodyJsonFields
+                })}
               >
                 <option value="application/json">application/json</option>
                 <option value="multipart/form-data">multipart/form-data</option>
+                <option value="x-www-form-urlencoded" disabled>(coming soon)</option>
               </select>
-              <span className="text-xs text-orange-300">coming soon</span>
+              {value.requestBodyContentType === "application/json" && (
+                <button
+                  className="text-sm underline text-orange-300 hover:cursor-pointer"
+                  onClick={() => setShowJsonModal(true)}
+                >
+                  Preview JSON
+                </button>
+              )}
+              {value.requestBodyContentType === "application/json" && (
+                <button
+                  className="text-sm underline text-orange-300"
+                  onClick={() => setShowImportModal(true)}
+                >
+                  Import JSON
+                </button>
+              )}
             </div>
             <button className="text-sm underline hover:cursor-pointer" onClick={addRequestBodyField}>
               Add field
@@ -172,6 +246,20 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
           ))}
         </div>
       </div>
+      <JsonPreviewModal
+        open={showJsonModal}
+        onClose={() => setShowJsonModal(false)}
+        json={jsonFieldToObject(value.requestBodyJsonFields || [])}
+      />
+      <JsonImportModal
+        open={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImport={(jsonString) => {
+          const parsed = JSON.parse(jsonString);
+          const fields = objectToJsonField(parsed); // you already generated this file
+          onChange({ ...value, requestBodyJsonFields: fields });
+        }}
+      />
     </div>
   )
 }

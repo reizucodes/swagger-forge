@@ -7,6 +7,7 @@ interface Props {
 }
 
 export function ResponseField({ response, onChange, onRemove }: Props) {
+    // TODO add response types
     return (
         <div className="grid grid-cols-3 gap-2 items-center">
             <input className="p-1 border rounded" value={response.code || ''} onChange={e => onChange({ ...response, code: e.target.value })} />
