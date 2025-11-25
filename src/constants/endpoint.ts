@@ -95,6 +95,10 @@ export const SAMPLE_JSON_ADD_PET_ENDPOINT: Endpoint = {
 export const SAMPLE_FORMDATA_UPLOAD_ENDPOINT: Endpoint = {
     method: "post",
     path: "/upload",
+    operationId: 'uploadFile',
+    tags: 'File Upload',
+    summary: 'Upload file to database',
+    description: 'Stores new file',
     requestBodyContentType: "multipart/form-data",
     requestBodyJsonFields: [
         { property: "userId", schemaType: "integer", example: 10 , description: "User ID"},
