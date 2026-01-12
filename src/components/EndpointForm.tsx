@@ -33,8 +33,9 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
     onChange({ ...value, responses: [...(value.responses || []), resp] })
   }
 
-  const [showJsonModal, setShowJsonModal] = useState(false);
-  const [showImportModal, setShowImportModal] = useState(false);
+  const [showJsonModal, setShowJsonModal] = useState<boolean>(false);
+  const [showImportModal, setShowImportModal] = useState<boolean>(false);
+  const [selectedSample, setSelectedSample] = useState<string>('');
 
 
   return (
@@ -43,9 +44,15 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
         {/* Sample Request Selector */}
         <select
           className="p-2 border rounded text-sm"
+          value={selectedSample}
           onChange={(e) => {
             const key = e.target.value;
-            if (!key) return;
+            console.log('key: ' + key);
+            setSelectedSample(key);
+            if (!key) {
+              onChange(EMPTY_ENDPOINT)
+              return;
+            }
             const sample = key.startsWith("json:")
               ? SAMPLE_ENDPOINTS.json[key.replace("json:", "")]
               : SAMPLE_ENDPOINTS.formData[key.replace("form:", "")];
@@ -71,7 +78,10 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
         {/* Clear Button */}
         <button
           className="text-sm underline text-red-400 hover:cursor-pointer"
-          onClick={() => onChange(EMPTY_ENDPOINT)}
+          onClick={() => {
+            onChange(EMPTY_ENDPOINT);
+            setSelectedSample('');
+          }}
         >
           Reset
         </button>
