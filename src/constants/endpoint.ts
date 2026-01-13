@@ -58,7 +58,7 @@ export const SAMPLE_JSON_ADD_PET_ENDPOINT: Endpoint = {
         { 
             property: 'tags', 
             schemaType: 'array', 
-            example: 'cute, friendly', 
+            example: 'cute,friendly', 
             description: 'Tags for the pet' 
         },
         { 

@@ -1,5 +1,6 @@
 {
-  "name": "swagger-forge",
+  "name": "apispec-forge",
+  "description": "Visual API specification builder with multi-language OpenAPI generators",
   "private": true,
   "version": "0.0.0",
   "type": "module",
