@@ -1,4 +1,4 @@
-import type { Endpoint, JsonField } from '../types/index'
+import type { Endpoint, JsonField } from '../../../../types'
 
 const indent = (n = 1) => ' '.repeat(n * 4)
 
@@ -6,11 +6,6 @@ function escapeForPhpString(s: string): string {
     return s.replace(/\\/g, '\\\\').replace(/\"/g, '\\"')
 }
 
-/**
- * @deprecated
- * Use generateAnnotation from `utils/annotation` instead.
- * This function is PHP-only and will be removed.
- */
 export function generateOaAnnotation(e: Endpoint): string {
     const lines: string[] = []
     const method = e.method.toUpperCase()

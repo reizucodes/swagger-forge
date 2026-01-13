@@ -43,7 +43,7 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
       <div className="flex items-center justify-between mb-4">
         {/* Sample Request Selector */}
         <select
-          className="p-2 border rounded text-sm"
+          className="p-2 border rounded text-xs"
           value={selectedSample}
           onChange={(e) => {
             const key = e.target.value;

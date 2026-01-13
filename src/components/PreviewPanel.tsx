@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import type { Endpoint } from '../types/index'
-import { generateOaAnnotation } from '../utils/generateAnnotation'
+import { generateAnnotation, ANNOTATION_TIPS, ANNOTATION_TARGETS } from '../utils/annotation'
+import type { AnnotationTarget } from '../utils/annotation'
 
 interface Props {
   endpoint: Endpoint
 }
 
 export default function PreviewPanel({ endpoint }: Props) {
-  const annotation = generateOaAnnotation(endpoint)
+  const [target, setTarget] = useState<AnnotationTarget>('php-swagger')
+  const annotation = generateAnnotation(endpoint, target)
   const [copied, setCopied] = useState(false)
 
   const copy = async () => {
@@ -19,7 +21,20 @@ export default function PreviewPanel({ endpoint }: Props) {
   return (
     <div className="h-full p-4 flex flex-col">
       <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center">
         <h3 className="font-semibold">Generated Annotation</h3>
+        <select
+          className="text-xs border rounded px-2 py-1 ml-2"
+          value={target}
+          onChange={(e) => setTarget(e.target.value as AnnotationTarget)}
+        >
+          {ANNOTATION_TARGETS.map(({ value, label, isDisabled}) => (
+            <option key={value} value={value} disabled={isDisabled}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </div>
         <div className="flex items-center gap-2">
           {copied && <span className="text-sm">Copied!</span>}
           <button
@@ -39,8 +54,7 @@ export default function PreviewPanel({ endpoint }: Props) {
       </pre>
 
       <div className="mt-3 text-xs text-gray-600 dark:text-gray-400">
-        Tip: Paste above your controller method.  
-        If you’re using <code>l5-swagger</code>, keep method-level <code>@OA</code> annotations here.
+        Tip: {ANNOTATION_TIPS[target]}
       </div>
     </div>
   )
