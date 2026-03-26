@@ -1,4 +1,4 @@
-import type { Endpoint } from '../types';
+import type { Endpoint } from "@/domain/endpoint/models/Endpoint";
 
 export const EMPTY_ENDPOINT: Endpoint = {
     method: 'get',
@@ -108,10 +108,8 @@ export const SAMPLE_FORMDATA_UPLOAD_ENDPOINT: Endpoint = {
     security: { bearer: false }
 };
 
-export const SAMPLE_ENDPOINTS: {
-    json: Record<string, Endpoint>;
-    formData: Record<string, Endpoint>;
-} = {
+export const SAMPLE_ENDPOINTS: { json: Record<string, Endpoint>; formData: Record<string, Endpoint>;} = 
+{
     json: {
         POST_ADD_PET: SAMPLE_JSON_ADD_PET_ENDPOINT
     },

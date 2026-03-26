@@ -1,4 +1,5 @@
-import type { Parameter, ParamLocation } from '../../types/index'
+import type { Parameter } from "@/domain/endpoint/models/Parameter"
+import type { ParamLocation } from "@/domain/endpoint/models/enums";
 
 interface Props {
     parameter: Parameter

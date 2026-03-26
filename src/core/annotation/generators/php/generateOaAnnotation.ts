@@ -1,4 +1,5 @@
-import type { Endpoint, JsonField } from '../../../../types'
+import type { Endpoint } from "@/domain/endpoint/models/Endpoint"
+import type { JsonField } from "@/domain/endpoint/models/JsonField"
 
 const indent = (n = 1) => ' '.repeat(n * 4)
 

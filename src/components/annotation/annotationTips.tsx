@@ -1,5 +1,5 @@
 import type { JSX } from 'react'
-import type { AnnotationTarget } from './contracts'
+import type { AnnotationTarget } from '@/core/annotation/contracts/AnnotationTarget'
 
 export const ANNOTATION_TIPS: Record<AnnotationTarget, JSX.Element> = {
   'php-swagger': (
