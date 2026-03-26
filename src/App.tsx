@@ -1,9 +1,9 @@
-import EndpointForm from './components/EndpointForm'
-import PreviewPanel from './components/PreviewPanel'
-import { useEndpointBuilder } from './hooks/useEndpointBuilder'
+import EndpointForm from '@/components/endpoint-form/EndpointForm'
+import PreviewPanel from '@/components/preview/PreviewPanel'
+import { useEndpointForm } from '@/hooks/useEndpointForm'
 
 export default function App() {
-  const { endpoint, update, allowed } = useEndpointBuilder()
+  const { endpoint, update, allowed } = useEndpointForm()
 
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">

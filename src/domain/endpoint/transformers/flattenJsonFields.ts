@@ -1,4 +1,4 @@
-import type { JsonField } from "../types";
+import type { JsonField } from "@/domain/endpoint/models/JsonField";
 
 export function flattenJsonFields(fields: JsonField[]): JsonField[] {
   return fields.map(f => ({

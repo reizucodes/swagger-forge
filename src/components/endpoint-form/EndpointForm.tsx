@@ -1,15 +1,17 @@
 import { useState } from 'react'
-import type { Endpoint, Parameter, JsonField } from '../types/index'
-import { ParameterField } from './endpoint-form/ParameterField'
-import { JsonFieldEditor } from './endpoint-form/JsonFieldEditor'
-import { ResponseField } from './endpoint-form/ResponseField'
-import { EMPTY_ENDPOINT } from '../constants/endpoint'
-import { SAMPLE_ENDPOINTS } from '../constants/endpoint'
-import { JsonPreviewModal } from './modals/JsonPreviewModal'
-import { JsonImportModal } from './modals/JsonImportModal'
-import { jsonFieldToObject } from '../utils/jsonFieldToObject'
-import { objectToJsonField } from '../utils/objectJsonToField'
-import { flattenJsonFields } from '../utils/flattenJsonFields'
+import type { Endpoint } from '@/domain/endpoint/models/Endpoint'
+import type { Parameter } from '@/domain/endpoint/models/Parameter'
+import type { JsonField } from '@/domain/endpoint/models/JsonField'
+import { ParameterField } from '@/components/endpoint-form/ParameterField'
+import { JsonFieldEditor } from '@/components/endpoint-form/JsonFieldEditor'
+import { ResponseField } from '@/components/endpoint-form/ResponseField'
+import { EMPTY_ENDPOINT } from '@/constants/endpoint'
+import { SAMPLE_ENDPOINTS } from '@/constants/endpoint'
+import { JsonPreviewModal } from '@/components/modals/JsonPreviewModal'
+import { JsonImportModal } from '@/components/modals/JsonImportModal'
+import { jsonFieldToObject } from '@/domain/endpoint/transformers/jsonFieldToObject'
+import { objectToJsonField } from '@/domain/endpoint/transformers/objectToJsonField'
+import { flattenJsonFields } from '@/domain/endpoint/transformers/flattenJsonFields'
 
 interface Props {
   value: Endpoint
@@ -47,7 +49,6 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
           value={selectedSample}
           onChange={(e) => {
             const key = e.target.value;
-            console.log('key: ' + key);
             setSelectedSample(key);
             if (!key) {
               onChange(EMPTY_ENDPOINT)
@@ -95,11 +96,11 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
             value={value.method}
             onChange={e => onChange({ ...value, method: e.target.value as any })}
           >
-            <option value="get">GET</option>
-            <option value="post">POST</option>
-            <option value="put">PUT</option>
-            <option value="patch">PATCH</option>
-            <option value="delete">DELETE</option>
+            <option value="get"> GET </option>
+            <option value="post"> POST </option>
+            <option value="put"> PUT </option>
+            <option value="patch"> PATCH </option>
+            <option value="delete"> DELETE </option>
           </select>
         </label>
         <label className="flex flex-col">

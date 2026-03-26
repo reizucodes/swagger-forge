@@ -1,8 +1,8 @@
-import type { Endpoint } from '../../types'
-import type { AnnotationTarget } from './contracts'
-import { PhpSwaggerGenerator } from './generators/php/phpSwaggerGenerator'
-import { JsJsDocGenerator } from './generators/js/jsJsDocGenerator'
-import { OpenApiJsonGenerator } from './generators/openapi/openApiJsonGenerator'
+import type { Endpoint } from '@/domain/endpoint/models/Endpoint'
+import type { AnnotationTarget } from '@/core/annotation/contracts/AnnotationTarget'
+import { PhpSwaggerGenerator } from '@/core/annotation/generators/php/phpSwaggerGenerator'
+import { JsJsDocGenerator } from '@/core/annotation/generators/js/jsJsDocGenerator'
+import { OpenApiJsonGenerator } from '@/core/annotation/generators/openapi/openApiJsonGenerator'
 
 export function generateAnnotation(
     endpoint: Endpoint,
