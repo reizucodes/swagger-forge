@@ -1,5 +1,5 @@
-import type { Endpoint } from '../../../../types'
-import type { AnnotationGenerator } from '../../contracts'
+import type { Endpoint } from "@/domain/endpoint/models/Endpoint"
+import type { AnnotationGenerator } from "@/core/annotation/contracts/AnnotationGenerator"
 
 // Sample only
 export class JsJsDocGenerator implements AnnotationGenerator {

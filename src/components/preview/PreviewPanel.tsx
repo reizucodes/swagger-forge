@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import type { Endpoint } from '../types/index'
-import { generateAnnotation, ANNOTATION_TIPS, ANNOTATION_TARGETS } from '../utils/annotation'
-import type { AnnotationTarget } from '../utils/annotation'
+import type { Endpoint } from '@/domain/endpoint/models/Endpoint'
+import { generateAnnotation } from '@/core/annotation/generateAnnotation'
+import type { AnnotationTarget } from '@/core/annotation/contracts/AnnotationTarget'
+import { ANNOTATION_TIPS } from '@/components/annotation/annotationTips'
+import { ANNOTATION_TARGETS } from '@/components/annotation/annotationTargets'
 
 interface Props {
   endpoint: Endpoint

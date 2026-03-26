@@ -1,4 +1,4 @@
-import type { ResponseDef } from '../../types/index'
+import type { ResponseDef } from "@/domain/endpoint/models/Response"
 
 interface Props {
     response: ResponseDef

@@ -1,6 +1,6 @@
 // generators/openapi/openApiJsonGenerator.ts
-import type { Endpoint } from '../../../../types'
-import type { AnnotationGenerator } from '../../contracts'
+import type { Endpoint } from "@/domain/endpoint/models/Endpoint"
+import type { AnnotationGenerator } from "@/core/annotation/contracts/AnnotationGenerator"
 
 export class OpenApiJsonGenerator implements AnnotationGenerator {
     generate(endpoint: Endpoint): string {

@@ -1,4 +1,4 @@
-import type { JsonField } from "../types";
+import type { JsonField } from "@/domain/endpoint/models/JsonField";
 
 export function jsonFieldToObject(fields: JsonField[]): any {
     const result: Record<string, any> = {};

@@ -1,4 +1,5 @@
-import type { JsonField, RequestBodyContentType } from '../../types/index'
+import type { JsonField } from "@/domain/endpoint/models/JsonField"
+import type { RequestBodyContentType } from "@/domain/endpoint/models/enums"
 
 interface Props {
     field: JsonField

@@ -1,4 +1,4 @@
-import type { JsonField } from "../types";
+import type { JsonField } from "@/domain/endpoint/models/JsonField";
 
 /**
  * Converts a JSON object -> JsonField[] recursively.
