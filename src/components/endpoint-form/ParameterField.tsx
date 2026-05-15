@@ -1,5 +1,5 @@
 import type { Parameter } from "@/domain/endpoint/models/Parameter"
-import type { ParamLocation } from "@/domain/endpoint/models/enums";
+import type { ParamLocation, SchemaType } from "@/domain/endpoint/models/enums";
 
 interface Props {
     parameter: Parameter
@@ -34,7 +34,7 @@ export function ParameterField({ parameter, allowed, onChange, onRemove }: Props
             <select
                 className="p-1 border rounded"
                 value={parameter.schemaType || 'string'}
-                onChange={e => onChange({ ...parameter, schemaType: e.target.value as any })}
+                onChange={e => onChange({ ...parameter, schemaType: e.target.value as SchemaType })}
             >
                 <option value="string">string</option>
                 <option value="integer">integer</option>

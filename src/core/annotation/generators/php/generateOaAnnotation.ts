@@ -4,7 +4,7 @@ import type { JsonField } from "@/domain/endpoint/models/JsonField"
 const indent = (n = 1) => ' '.repeat(n * 4)
 
 function escapeForPhpString(s: string): string {
-    return s.replace(/\\/g, '\\\\').replace(/\"/g, '\\"')
+    return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
 }
 
 export function generateOaAnnotation(e: Endpoint): string {
@@ -124,8 +124,8 @@ function renderJsonField(field: JsonField, depth = 3): string[] {
     
     if (shouldRenderExample) {
         if (isPrimitiveArray) {
-            let raw = String(field.example)
-                .replace(/[\[\]]/g, '')   // remove [ ]
+            const raw = String(field.example)
+                .replace(/[[\]]/g, '')   // remove [ ]
                 .split(',')
                 .map(v => v.trim())
                 .filter(v => v !== '');

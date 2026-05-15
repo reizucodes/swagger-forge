@@ -1,4 +1,5 @@
 import type { AnnotationTarget } from "@/core/annotation/contracts/AnnotationTarget"
+import { listGeneratorDefinitions } from "@/core/annotation/registry/generatorRegistry"
 
 export interface AnnotationTargetOption {
     value: AnnotationTarget
@@ -7,8 +8,9 @@ export interface AnnotationTargetOption {
 }
 
 export const ANNOTATION_TARGETS: readonly AnnotationTargetOption[] = [
-    { value: 'php-swagger', label: 'PHP (Swagger)' },
-    { value: 'js-jsdoc', label: 'JavaScript (JSDoc)' , isDisabled: true},
-    { value: 'openapi-json', label: 'OpenAPI JSON (Native)', isDisabled:true},
+    ...listGeneratorDefinitions().map(def => ({
+        value: def.target,
+        label: def.label,
+        isDisabled: !def.isEnabled,
+    })),
 ] as const satisfies readonly AnnotationTargetOption[]
-

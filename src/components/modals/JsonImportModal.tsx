@@ -7,16 +7,16 @@ interface Props {
 }
 
 export function JsonImportModal({ open, onClose, onImport }: Props) {
-    if (!open) return null;
-
     const [input, setInput] = useState("");
     const [error, setError] = useState<string | null>(null);
+
+    if (!open) return null;
 
     const handleValidate = () => {
         try {
             JSON.parse(input);
             setError(null);
-        } catch (e) {
+        } catch {
             setError("Invalid JSON format");
         }
     };
