@@ -66,7 +66,7 @@ export function objectToJsonField(obj: unknown): JsonField[] {
     result.push({
       property: key,
       schemaType: detectPrimitiveType(value),
-      example: value,
+      example: value as JsonField['example'],
       description: "",
       children: []
     });
