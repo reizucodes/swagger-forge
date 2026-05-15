@@ -49,7 +49,7 @@ export function ParameterField({ parameter, allowed, onChange, onRemove }: Props
                 onClick={() => onChange({ ...parameter, required: !parameter.required })}
             >
                 {parameter.required ? (
-                    <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10 1a9 9 0 1 0 9 9A9 9 0 0 0 10 1zm1 13H9v-2h2zm0-4H9V5h2z" />
                     </svg>
                 ) : (
