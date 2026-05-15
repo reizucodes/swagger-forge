@@ -1,7 +1,7 @@
 import type { JsonField } from "@/domain/endpoint/models/JsonField";
 
-export function jsonFieldToObject(fields: JsonField[]): any {
-    const result: Record<string, any> = {};
+export function jsonFieldToObject(fields: JsonField[]): Record<string, unknown> {
+    const result: Record<string, unknown> = {};
 
     for (const field of fields) {
         const { property, schemaType, example, children } = field;
@@ -19,7 +19,12 @@ export function jsonFieldToObject(fields: JsonField[]): any {
             if (children && children.length > 0) {
                 result[property] = [jsonFieldToObject(children)];
             } else {
-                result[property] = example ? String(example).split(",") : [];
+                result[property] = example
+                  ? String(example)
+                      .split(",")
+                      .map((v) => v.trim())
+                      .filter((v) => v !== "")
+                  : [];
             }
             continue;
         }

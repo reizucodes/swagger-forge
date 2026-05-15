@@ -4,7 +4,6 @@ import type { AnnotationGenerator } from "@/core/annotation/contracts/Annotation
 
 export class OpenApiJsonGenerator implements AnnotationGenerator {
     generate(endpoint: Endpoint): string {
-        console.log(endpoint)
         const spec = {
             openapi: '3.0.0',
             paths: {

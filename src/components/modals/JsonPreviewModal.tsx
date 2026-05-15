@@ -3,7 +3,7 @@ import { useState } from "react";
 interface Props {
     open: boolean;
     onClose: () => void;
-    json: any;
+    json: unknown;
 }
 
 export function JsonPreviewModal({ open, onClose, json }: Props) {
