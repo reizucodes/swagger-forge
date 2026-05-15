@@ -3,7 +3,8 @@ import type { JsonField } from "@/domain/endpoint/models/JsonField";
 /**
  * Converts a JSON object -> JsonField[] recursively.
  */
-export function objectToJsonField(obj: any): JsonField[] {
+export function objectToJsonField(obj: unknown): JsonField[] {
+  if (!isRecord(obj)) return [];
   const result: JsonField[] = [];
 
   for (const key of Object.keys(obj)) {
@@ -11,7 +12,7 @@ export function objectToJsonField(obj: any): JsonField[] {
 
     // Determine type
     const isArray = Array.isArray(value);
-    const isObject = typeof value === "object" && !isArray && value !== null;
+    const isObject = isRecord(value);
 
     // CASE: OBJECT
     if (isObject) {
@@ -31,6 +32,16 @@ export function objectToJsonField(obj: any): JsonField[] {
       const first = value[0];
 
       if (typeof first === "object") {
+        if (first === null) {
+          result.push({
+            property: key,
+            schemaType: "array",
+            example: value.map(String).join(", "),
+            description: "",
+            children: [],
+          });
+          continue;
+        }
         result.push({
           property: key,
           schemaType: "array",
@@ -55,7 +66,7 @@ export function objectToJsonField(obj: any): JsonField[] {
     result.push({
       property: key,
       schemaType: detectPrimitiveType(value),
-      example: value,
+      example: value as JsonField['example'],
       description: "",
       children: []
     });
@@ -65,10 +76,14 @@ export function objectToJsonField(obj: any): JsonField[] {
 }
 
 /** Helper to match your schemaType values */
-function detectPrimitiveType(val: any): "string" | "integer" | "number" | "boolean" {
+function detectPrimitiveType(val: unknown): "string" | "integer" | "number" | "boolean" {
   if (typeof val === "number") {
     return Number.isInteger(val) ? "integer" : "number";
   }
   if (typeof val === "boolean") return "boolean";
   return "string";
+}
+
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return typeof v === "object" && v !== null && !Array.isArray(v);
 }

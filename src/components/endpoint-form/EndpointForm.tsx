@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Endpoint } from '@/domain/endpoint/models/Endpoint'
+import type { HttpMethod, RequestBodyContentType } from '@/domain/endpoint/models/enums'
 import type { Parameter } from '@/domain/endpoint/models/Parameter'
 import type { JsonField } from '@/domain/endpoint/models/JsonField'
 import { ParameterField } from '@/components/endpoint-form/ParameterField'
@@ -11,7 +12,7 @@ import { JsonPreviewModal } from '@/components/modals/JsonPreviewModal'
 import { JsonImportModal } from '@/components/modals/JsonImportModal'
 import { jsonFieldToObject } from '@/domain/endpoint/transformers/jsonFieldToObject'
 import { objectToJsonField } from '@/domain/endpoint/transformers/objectToJsonField'
-import { flattenJsonFields } from '@/domain/endpoint/transformers/flattenJsonFields'
+import { setRequestBodyContentType } from '@/application/endpoint/requestBody'
 
 interface Props {
   value: Endpoint
@@ -94,7 +95,7 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
           <select
             className="mt-1 p-2 rounded border"
             value={value.method}
-            onChange={e => onChange({ ...value, method: e.target.value as any })}
+            onChange={e => onChange({ ...value, method: e.target.value as HttpMethod })}
           >
             <option value="get"> GET </option>
             <option value="post"> POST </option>
@@ -185,13 +186,7 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
               <select 
                 className="border rounded p-1 text-sm"
                 value={value.requestBodyContentType}
-                onChange={e => onChange({
-                  ...value, 
-                  requestBodyContentType: e.target.value as any, 
-                  requestBodyJsonFields:  e.target.value === "multipart/form-data"
-                                            ? flattenJsonFields(value.requestBodyJsonFields || [])
-                                            : value.requestBodyJsonFields
-                })}
+                onChange={e => onChange(setRequestBodyContentType(value, e.target.value as RequestBodyContentType))}
               >
                 <option value="application/json">application/json</option>
                 <option value="multipart/form-data">multipart/form-data</option>

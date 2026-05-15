@@ -1,5 +1,6 @@
 import type { JsonField } from "@/domain/endpoint/models/JsonField"
-import type { RequestBodyContentType } from "@/domain/endpoint/models/enums"
+import type { RequestBodyContentType, SchemaType } from "@/domain/endpoint/models/enums"
+import { applyJsonFieldPatch, getJsonFieldEditorRules } from "@/domain/endpoint/rules/jsonFieldEditing"
 
 interface Props {
     field: JsonField
@@ -9,62 +10,19 @@ interface Props {
 }
 
 export function JsonFieldEditor({ field, onChange, onRemove, contentType }: Props) {
-    const hasChildren = (field.children?.length ?? 0) > 0
-    const hasExample = !!field.example
-
-    // Rules
-    let disableExample = false
-    let disableChildren = false
-
-    if (field.schemaType === 'object') {
-        disableExample = true
-        disableChildren = false
-    }
-
-    if (field.schemaType === 'file' && contentType === "multipart/form-data") {
-        disableExample = true
-    } else if(field.schemaType === 'file' && contentType === 'application/json') {
-        disableExample = false
-        if(!field.example) field.example = ''
-    }
-
-    if (field.schemaType === 'array') {
-        if (hasChildren) disableExample = true
-        if (hasExample) disableChildren = true
-    }
-
-    // If form-data: flatten — remove children entirely
-    if (contentType === "multipart/form-data" && field.children?.length) {
-        onChange({ ...field, children: [] })
-    }
-
-    const isFormData = contentType === "multipart/form-data"
+    const { allowedSchemaTypes, disableExample, disableChildren } = getJsonFieldEditorRules(field, contentType)
 
     const updateChild = (i: number, patch: Partial<JsonField>) => {
         const children = [...(field.children || [])]
-        children[i] = { ...children[i], ...patch }
-        onChange({ ...field, children })
+        children[i] = applyJsonFieldPatch(children[i], patch, contentType)
+        onChange(applyJsonFieldPatch(field, { children }, contentType))
     }
 
     const removeChild = (i: number) => {
         const children = [...(field.children || [])]
         children.splice(i, 1)
-        onChange({ ...field, children })
+        onChange(applyJsonFieldPatch(field, { children }, contentType))
     }
-
-    const schemaTypes = [
-        'string',
-        'integer',
-        'boolean',
-        'number',
-        'array',
-        'object',
-        ...(contentType === 'multipart/form-data' ? ['file'] : []),
-    ]
-
-    const filteredSchemaTypes = contentType === "multipart/form-data"
-            ? schemaTypes.filter(type => type !== "array" && type !== "object")
-            : schemaTypes;
 
     return (
         <div className="p-2 border rounded space-y-2">
@@ -74,23 +32,17 @@ export function JsonFieldEditor({ field, onChange, onRemove, contentType }: Prop
                     className="p-1 border rounded"
                     placeholder="field"
                     value={field.property}
-                    onChange={e => onChange({ ...field, property: e.target.value })}
+                    onChange={e => onChange(applyJsonFieldPatch(field, { property: e.target.value }, contentType))}
                 />
                 {/* Type */}
                 <select
                     className="p-1 border rounded"
                     value={field.schemaType || 'string'}
                     onChange={e =>
-                        onChange({
-                            ...field,
-                            schemaType: e.target.value as any,
-                            // Reset conflicting states
-                            example: '',
-                            children: [],
-                        })
+                        onChange(applyJsonFieldPatch(field, { schemaType: e.target.value as SchemaType, example: '', children: [] }, contentType))
                     }
                 >
-                    {filteredSchemaTypes.map(type => (
+                    {allowedSchemaTypes.map(type => (
                         <option key={type} value={type}>
                             {type}
                         </option>
@@ -104,14 +56,14 @@ export function JsonFieldEditor({ field, onChange, onRemove, contentType }: Prop
                     placeholder={disableExample ? 'disabled' : 'example'}
                     disabled={disableExample}
                     value={String(disableExample ? '' : field.example)}
-                    onChange={e => onChange({ ...field, example: e.target.value })}
+                    onChange={e => onChange(applyJsonFieldPatch(field, { example: e.target.value }, contentType))}
                 />
                 {/* Description */}
                 <input
                     className="p-1 border rounded"
                     placeholder="description"
                     value={field.description || ''}
-                    onChange={e => onChange({ ...field, description: e.target.value })}
+                    onChange={e => onChange(applyJsonFieldPatch(field, { description: e.target.value }, contentType))}
                 />
 
                 {/* Delete */}
@@ -148,7 +100,7 @@ export function JsonFieldEditor({ field, onChange, onRemove, contentType }: Prop
                                     ...(field.children || []),
                                     { property: '', schemaType: 'string', example: '', description: '' },
                                 ]
-                                onChange({ ...field, children })
+                                onChange(applyJsonFieldPatch(field, { children }, contentType))
                             }}
                         >
                             Add child
@@ -157,8 +109,7 @@ export function JsonFieldEditor({ field, onChange, onRemove, contentType }: Prop
                     </div>
 
                     {/* Render children */}
-                    {!isFormData &&
-                    !disableChildren &&
+                    {!disableChildren &&
                     (field.children || []).map((child, i) => (
                         <JsonFieldEditor
                             key={i}
