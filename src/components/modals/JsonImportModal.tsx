@@ -44,12 +44,12 @@ export function JsonImportModal({ open, onClose, onImport }: Props) {
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 w-[650px] max-h-[80vh] overflow-auto">
+            <div className="bg-white dark:bg-neutral-800/95 border border-neutral-700 rounded-lg p-4 w-[650px] max-h-[80vh] overflow-auto">
             {/* Header */}
             <div className="flex justify-between items-center mb-3">
                 <h2 className="font-semibold text-lg">Import JSON</h2>
                 <button
-                    className="text-xs bg-gray-900 hover:bg-gray-800 px-3 py-1 rounded border-1"
+                    className="px-3 py-1 text-md hover:bg-neutral-900/60 hover:cursor-pointer rounded border"
                     onClick={onClose}
                     title="Close"
                 >
@@ -60,13 +60,13 @@ export function JsonImportModal({ open, onClose, onImport }: Props) {
             <div className="flex justify-between mb-3">
                 <div className="flex gap-2">
                     <button
-                        className="px-3 py-1 border rounded hover:bg-gray-700 text-sm"
+                        className="px-3 py-1 border rounded hover:bg-neutral-700 text-sm"
                         onClick={handleValidate}
                     >
                         Validate
                     </button>
                     <button
-                        className="px-3 py-1 border rounded hover:bg-gray-700 text-sm"
+                        className="px-3 py-1 border rounded hover:bg-neutral-700 text-sm"
                         onClick={handlePrettify}
                     >
                         Prettify
@@ -82,12 +82,12 @@ export function JsonImportModal({ open, onClose, onImport }: Props) {
 
             {/* Error */}
             {error && (
-                <div className="text-red-400 text-sm mb-2">{error}</div>
+                <div className="text-red-400 text-xs mb-2 ml-0.5">{error}</div>
             )}
 
             {/* Textarea */}
             <textarea
-                className="w-full h-64 bg-gray-800 border border-gray-700 rounded p-2 text-sm font-mono"
+                className="w-full h-64 bg-neutral-800 border border-neutral-700 rounded p-2 text-sm font-mono"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
 placeholder='{
