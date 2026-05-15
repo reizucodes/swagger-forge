@@ -19,7 +19,7 @@ export function JsonPreviewModal({ open, onClose, json }: Props) {
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 w-[650px] max-h-[80vh] overflow-auto">
+            <div className="bg-white dark:bg-neutral-800/95 border border-neutral-700 rounded-lg p-4 w-[650px] max-h-[80vh] overflow-auto">
               {/* Header */}
                 <div className="flex justify-between items-center mb-3">
                     <h2 className="font-semibold text-lg">JSON Preview</h2> 
@@ -28,11 +28,11 @@ export function JsonPreviewModal({ open, onClose, json }: Props) {
                         {copied && <span className="text-sm">Copied!</span>}   
                       {/* Copy button */}
                         <button
-                            className="px-2 py-1 border rounded hover:bg-gray-800 transition"
+                            className="px-2 py-1 border rounded hover:bg-neutral-900/60 hover:cursor-pointer transition"
                             onClick={handleCopy}
                             title="Copy JSON"
                         >
-                        <svg width="19" height="24" className="px-1 py-1" viewBox="0 0 512 512">
+                        <svg width="18" height="24" className="px-1" viewBox="0 0 512 512">
                             <path
                                 fill="currentColor"
                                 stroke="currentColor"
@@ -42,7 +42,7 @@ export function JsonPreviewModal({ open, onClose, json }: Props) {
                         </button> 
                         {/* Close button */}
                         <button
-                            className="text-md bg-gray-900 hover:bg-gray-800 px-3 py-1 rounded border-1"
+                            className="px-3 py-1.5 text-md hover:bg-neutral-900/60 hover:cursor-pointer rounded border"
                             onClick={onClose}
                             title="Close"
                         >
@@ -51,7 +51,7 @@ export function JsonPreviewModal({ open, onClose, json }: Props) {
                     </div>
                 </div>    
                 {/* JSON Content */}
-                <pre className="text-sm whitespace-pre-wrap bg-gray-800 p-3 rounded border">
+                <pre className="text-sm whitespace-pre-wrap bg-neutral-800/70 p-3 rounded border">
                     {JSON.stringify(json, null, 2)}
                 </pre>
             </div>
