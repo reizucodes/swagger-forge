@@ -15,7 +15,7 @@ export function generateOaAnnotation(e: Endpoint): string {
     lines.push(`*${indent()}@OA\\${capitalize(method)}(`)
     lines.push(`*${indent(2)}path="${escapeForPhpString(e.path)}",`)
 
-    if (e.security?.bearer) lines.push(`*${indent(2)}security={{"sanctum": {}}},`)
+    if (e.security?.type === 'sanctum') lines.push(`*${indent(2)}security={{"sanctum": {}}},`)
     if (e.operationId) lines.push(`*${indent(2)}operationId="${escapeForPhpString(e.operationId)}",`)
     if (e.tags) lines.push(`*${indent(2)}tags={"${escapeForPhpString(e.tags)}"},`)
     if (e.summary) lines.push(`*${indent(2)}summary="${escapeForPhpString(e.summary)}",`)
