@@ -1,3 +1,52 @@
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
 html, body, #root { height: 100%; }
+
+:root {
+  --gh-canvas:          #ffffff;
+  --gh-canvas-subtle:   #f6f8fa;
+  --gh-canvas-inset:    #eaeef2;
+  --gh-border:          #d0d7de;
+  --gh-border-muted:    #d8dee4;
+  --gh-text-primary:    #1f2328;
+  --gh-text-secondary:  #656d76;
+  --gh-text-placeholder:#8c959f;
+  --gh-text-disabled:   #8c959f;
+  --gh-accent:          #0969da;
+  --gh-accent-hover:    #0550ae;
+  --gh-accent-subtle:   #ddf4ff;
+  --gh-danger:          #d1242f;
+  --gh-danger-subtle:   #fff0ee;
+  --gh-code-bg:         #f6f8fa;
+  --gh-code-text:       #1f2328;
+  --gh-required-bg:     #ddf4ff;
+  --gh-required-text:   #0969da;
+}
+
+.dark {
+  --gh-canvas:          #22272e;
+  --gh-canvas-subtle:   #2d333b;
+  --gh-canvas-inset:    #1c2128;
+  --gh-border:          #444c56;
+  --gh-border-muted:    #373e47;
+  --gh-text-primary:    #adbac7;
+  --gh-text-secondary:  #768390;
+  --gh-text-placeholder:#545d68;
+  --gh-text-disabled:   #545d68;
+  --gh-accent:          #539bf5;
+  --gh-accent-hover:    #6cb6ff;
+  --gh-accent-subtle:   #1d2d3e;
+  --gh-danger:          #e5534b;
+  --gh-danger-subtle:   #3d1f1e;
+  --gh-code-bg:         #1c2128;
+  --gh-code-text:       #adbac7;
+  --gh-required-bg:     #1d2d3e;
+  --gh-required-text:   #539bf5;
+}
+
+body {
+  background-color: var(--gh-canvas);
+  color: var(--gh-text-primary);
+}
