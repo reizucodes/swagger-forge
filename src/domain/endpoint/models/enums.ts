@@ -15,3 +15,5 @@ export type RequestBodyContentType =
     | 'application/json'
     | 'multipart/form-data'
     | 'application/x-www-form-urlencoded'
+
+export type AuthType = 'none' | 'sanctum' | 'jwt'

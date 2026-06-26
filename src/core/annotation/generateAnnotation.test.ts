@@ -9,9 +9,9 @@ describe('generateAnnotation', () => {
       path: '/pets/{id}',
       summary: 'Get pet',
       parameters: [
-        { name: 'id', in: 'path', required: true, schemaType: 'integer' },
+        { id: crypto.randomUUID(), name: 'id', in: 'path', required: true, schemaType: 'integer' },
       ],
-      responses: [{ code: '200', description: 'Success' }],
+      responses: [{ id: crypto.randomUUID(), code: '200', description: 'Success' }],
     }
 
     const out = generateAnnotation(endpoint, 'php-swagger')
