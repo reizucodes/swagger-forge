@@ -5,7 +5,7 @@ import type { SpecVersion } from '@/core/annotation/specs'
 const indent = (n = 1) => '    '.repeat(n)
 
 function escapePhpSingleQuote(s: string): string {
-    return s.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
+    return s.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r/g, '').replace(/\n/g, '\\n')
 }
 
 function phpStr(s: string): string {
@@ -171,7 +171,8 @@ function renderProperty(field: JsonField, depth: number): string[] {
             const formatted = raw.map((v) => (allNumbers ? v : phpStr(v)))
             lines.push(`${pad}${indent(1)}example: [${formatted.join(', ')}],`)
         } else {
-            lines.push(`${pad}${indent(1)}example: ${phpStr(String(field.example))},`)
+            const exampleStr = escapePhpSingleQuote(String(field.example))
+            lines.push(`${pad}${indent(1)}example: '${exampleStr}',`)
         }
     }
 

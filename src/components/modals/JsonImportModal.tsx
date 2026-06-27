@@ -114,7 +114,7 @@ export function JsonImportModal({ open, onClose, onImport, sample }: Props) {
 
             {/* Textarea */}
             <textarea
-                className="w-full h-64 bg-[var(--gh-code-bg)] border border-[var(--gh-border)] rounded p-2 text-sm font-mono text-[var(--gh-code-text)] focus:outline-none focus:ring-1 focus:ring-[var(--gh-border)] focus:border-[var(--gh-accent)]/50"
+                className="w-full min-h-[8rem] h-48 max-h-[30vh] bg-[var(--gh-code-bg)] border border-[var(--gh-border)] rounded p-2 text-sm font-mono text-[var(--gh-code-text)] focus:outline-none focus:ring-1 focus:ring-[var(--gh-border)] focus:border-[var(--gh-accent)]/50 resize-y"
                 value={input}
                 onChange={(e) => { setInput(e.target.value); setValid(false); }}
 placeholder='{

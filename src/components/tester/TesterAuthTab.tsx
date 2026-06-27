@@ -35,7 +35,7 @@ export function TesterAuthTab({ auth, onChange }: Props) {
           <label className="text-xs text-[var(--gh-text-secondary)] w-24 shrink-0">
             {auth.type === 'bearer' ? 'Token' : 'Key value'}
           </label>
-          <div className="relative flex-1">
+          <div className="relative flex-1 min-w-0">
             <input
               type={showValue ? 'text' : 'password'}
               value={auth.value}

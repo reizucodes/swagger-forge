@@ -47,7 +47,7 @@ const PHP_SWAGGER_RULES: Rule[] = [
     { type: 'string',      regex: /"(?:[^"\\]|\\.)*"/g },
     { type: 'number',      regex: /\b\d+\b/g },
     { type: 'property',    regex: /\b[a-z][a-zA-Z]+(?==)/g },
-    { type: 'punctuation', regex: /[(){}=,\[\]]/g },
+    { type: 'punctuation', regex: /[(){}=,[\]]/g },
 ]
 
 const PHP_ATTRIBUTE_RULES: Rule[] = [
@@ -55,7 +55,7 @@ const PHP_ATTRIBUTE_RULES: Rule[] = [
     { type: 'string',      regex: /'(?:[^'\\]|\\.)*'/g },
     { type: 'number',      regex: /\b\d+\b/g },
     { type: 'property',    regex: /\b[a-z][a-zA-Z]+(?=:)/g },
-    { type: 'punctuation', regex: /[()=,\[\]:#\[\]]/g },
+    { type: 'punctuation', regex: /[()=,[\]:#[\]]/g },
 ]
 
 const OPENAPI_JSON_RULES: Rule[] = [
@@ -63,23 +63,36 @@ const OPENAPI_JSON_RULES: Rule[] = [
     { type: 'string',      regex: /"(?:[^"\\]|\\.)*"/g },
     { type: 'keyword',     regex: /\b(true|false|null)\b/g },
     { type: 'number',      regex: /\b\d+(\.\d+)?\b/g },
-    { type: 'punctuation', regex: /[{}\[\]:,]/g },
+    { type: 'punctuation', regex: /[{}[\]:,]/g },
 ]
 
 const JS_JSDOC_RULES: Rule[] = [
-    { type: 'comment',     regex: /\/\*\*|\*\/|^\s*\*/gm },
-    { type: 'keyword',     regex: /@openapi|@[a-z]+/g },
+    { type: 'comment',     regex: /\/\*\*|\*\/|\*(?= |\n)/gm },
+    { type: 'keyword',     regex: /@openapi\b|@[a-z]+\b/g },
+    { type: 'keyword',     regex: /\b(true|false|null)\b/g },
+    { type: 'keyword',     regex: /\b(string|integer|number|object|array|boolean)\b/g },
+    { type: 'string',      regex: /'[^']*'|"(?:[^"\\]|\\.)*"/g },
+    { type: 'number',      regex: /\b\d+\b/g },
+    { type: 'property',    regex: /\b[a-zA-Z][a-zA-Z0-9_\-/]*(?=:)/g },
+    { type: 'punctuation', regex: /[{}:,[\]]/g },
+    { type: 'string',      regex: /[a-zA-Z][^\n'"{}[\]:]+/g },
+]
+
+const PY_FASTAPI_RULES: Rule[] = [
+    { type: 'keyword',     regex: /@router\.(get|post|put|patch|delete|head|options)\b/g },
+    { type: 'keyword',     regex: /\b(True|False|None)\b/g },
     { type: 'string',      regex: /"(?:[^"\\]|\\.)*"/g },
     { type: 'number',      regex: /\b\d+\b/g },
-    { type: 'property',    regex: /^  [a-z]+:/gm },
-    { type: 'punctuation', regex: /[{}:,\[\]]/g },
+    { type: 'property',    regex: /\b[a-z][a-z_]*(?==)/g },
+    { type: 'punctuation', regex: /[()={},[\]:,]/g },
 ]
 
 export function tokenize(code: string, target: AnnotationTarget): Token[] {
     switch (target) {
-        case 'php-swagger':   return tokenizeWithRules(code, PHP_SWAGGER_RULES)
-        case 'php-attribute': return tokenizeWithRules(code, PHP_ATTRIBUTE_RULES)
-        case 'openapi-json':  return tokenizeWithRules(code, OPENAPI_JSON_RULES)
-        case 'js-jsdoc':      return tokenizeWithRules(code, JS_JSDOC_RULES)
+        case 'php-swagger':      return tokenizeWithRules(code, PHP_SWAGGER_RULES)
+        case 'php-attribute':    return tokenizeWithRules(code, PHP_ATTRIBUTE_RULES)
+        case 'openapi-json':     return tokenizeWithRules(code, OPENAPI_JSON_RULES)
+        case 'js-jsdoc':         return tokenizeWithRules(code, JS_JSDOC_RULES)
+        case 'py-fastapi':       return tokenizeWithRules(code, PY_FASTAPI_RULES)
     }
 }

@@ -40,10 +40,10 @@ export default function App() {
           <div className="flex items-center gap-2">
           <button
             onClick={() => setTesterOpen(true)}
-            className="px-3 py-1.5 rounded border border-[var(--gh-accent)] text-[var(--gh-accent)] text-sm hover:bg-[var(--gh-accent)]/10 transition flex items-center gap-1.5"
+            className="px-2 py-1 sm:px-3 sm:py-1.5 rounded border border-[var(--gh-accent)] text-[var(--gh-accent)] text-xs sm:text-sm hover:bg-[var(--gh-accent)]/10 transition flex items-center gap-1.5"
           >
             Test Endpoint
-            <span className="text-[10px] font-semibold px-1 py-0.5 rounded bg-[var(--gh-accent)]/15 text-[var(--gh-accent)] leading-none">Beta</span>
+            <span className="hidden sm:inline text-[10px] font-semibold px-1 py-0.5 rounded bg-[var(--gh-accent)]/15 text-[var(--gh-accent)] leading-none">Beta</span>
           </button>
           <button
             onClick={() => setShowHowTo(true)}

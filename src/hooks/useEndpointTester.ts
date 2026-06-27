@@ -1,9 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { Endpoint } from '@/domain/endpoint/models/Endpoint'
 import type { HttpMethod } from '@/domain/endpoint/models/enums'
 import { buildRequest } from '@/domain/endpoint/tester/buildRequest'
 import { detectCorsError } from '@/domain/endpoint/tester/detectCorsError'
 import { inferEndpoint } from '@/domain/endpoint/tester/inferEndpoint'
+import type { EnvVariable } from '@/domain/endpoint/tester/envVariables'
+import { loadEnvVariables, saveEnvVariables, buildEnvMap } from '@/domain/endpoint/tester/envVariables'
+import { resolveVariables } from '@/domain/endpoint/tester/resolveVariables'
 
 export type TesterStatus = 'idle' | 'sending' | 'success' | 'error'
 export type TesterAuthType = 'none' | 'bearer' | 'apiKey'
@@ -27,6 +30,7 @@ export interface TesterState {
   status: TesterStatus
   errorMessage: string | null
   response: TesterResponse | null
+  resolveWarnings: string[]
 }
 
 const initialState: TesterState = {
@@ -38,10 +42,23 @@ const initialState: TesterState = {
   status: 'idle',
   errorMessage: null,
   response: null,
+  resolveWarnings: [],
 }
 
 export function useEndpointTester() {
   const [state, setState] = useState<TesterState>(initialState)
+  const [envVariables, setEnvVariables] = useState<EnvVariable[]>(() => loadEnvVariables())
+
+  useEffect(() => { saveEnvVariables(envVariables) }, [envVariables])
+
+  const addEnvVariable = () =>
+    setEnvVariables(prev => [...prev, { id: globalThis.crypto.randomUUID(), name: '', value: '' }])
+
+  const updateEnvVariable = (id: string, field: 'name' | 'value', value: string) =>
+    setEnvVariables(prev => prev.map(v => v.id === id ? { ...v, [field]: value } : v))
+
+  const removeEnvVariable = (id: string) =>
+    setEnvVariables(prev => prev.filter(v => v.id !== id))
 
   const setMethod = (method: HttpMethod) =>
     setState(prev => ({ ...prev, method }))
@@ -89,7 +106,30 @@ export function useEndpointTester() {
     setState(prev => ({ ...prev, status: 'sending', errorMessage: null, response: null }))
     const start = performance.now()
     try {
-      const { url, init } = buildRequest(state)
+      const map = buildEnvMap(envVariables)
+      const resolvedState: TesterState = {
+        ...state,
+        url: resolveVariables(state.url, map).resolved,
+        auth: { ...state.auth, value: resolveVariables(state.auth.value, map).resolved },
+        headers: state.headers.map(h => ({
+          ...h,
+          key: resolveVariables(h.key, map).resolved,
+          value: resolveVariables(h.value, map).resolved,
+        })),
+        body: resolveVariables(state.body, map).resolved,
+      }
+      const allWarnings = [
+        ...resolveVariables(state.url, map).unresolvedTokens,
+        ...resolveVariables(state.auth.value, map).unresolvedTokens,
+        ...state.headers.flatMap(h => [
+          ...resolveVariables(h.key, map).unresolvedTokens,
+          ...resolveVariables(h.value, map).unresolvedTokens,
+        ]),
+        ...resolveVariables(state.body, map).unresolvedTokens,
+      ]
+      const resolveWarnings = [...new Set(allWarnings.filter(Boolean))]
+      setState(prev => ({ ...prev, resolveWarnings }))
+      const { url, init } = buildRequest(resolvedState)
       const res = await fetch(url, init)
       const durationMs = Math.round(performance.now() - start)
       const bodyText = await res.text()
@@ -148,5 +188,9 @@ export function useEndpointTester() {
     loadSample,
     reset,
     getEndpointPatch,
+    envVariables,
+    addEnvVariable,
+    updateEnvVariable,
+    removeEnvVariable,
   }
 }
