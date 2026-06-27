@@ -14,5 +14,8 @@ export interface Endpoint {
     requestBodyJsonFields?: JsonField[] // per-field schema
     requestBodyContentType?: RequestBodyContentType
     responses?: ResponseDef[]
-    security?: { type: AuthType }
+    security?: {
+        type: AuthType
+        headerName?: string  // for apiKey: e.g. "X-API-Key"
+    }
 }

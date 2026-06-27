@@ -4,6 +4,7 @@ import { listGeneratorDefinitions } from "@/core/annotation/registry/generatorRe
 export interface AnnotationTargetOption {
     value: AnnotationTarget
     label: string
+    group?: string
     isDisabled?: boolean
 }
 
@@ -11,6 +12,7 @@ export const ANNOTATION_TARGETS: readonly AnnotationTargetOption[] = [
     ...listGeneratorDefinitions().map(def => ({
         value: def.target,
         label: def.label,
+        group: def.group,
         isDisabled: !def.isEnabled,
     })),
 ] as const satisfies readonly AnnotationTargetOption[]
