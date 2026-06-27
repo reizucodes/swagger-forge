@@ -4,6 +4,7 @@ import type { SpecVersionId } from '@/core/annotation/specs'
 import { PhpSwaggerGenerator } from '@/core/annotation/generators/php/phpSwaggerGenerator'
 import { PhpAttributeGenerator } from '@/core/annotation/generators/php/phpAttributeGenerator'
 import { JsJsDocGenerator } from '@/core/annotation/generators/js/jsJsDocGenerator'
+import { PyFastApiGenerator } from '@/core/annotation/generators/python/pyFastApiGenerator'
 import { OpenApiJsonGenerator } from '@/core/annotation/generators/openapi/openApiJsonGenerator'
 
 export interface GeneratorDefinition {
@@ -18,13 +19,13 @@ export interface GeneratorDefinition {
 
 const definitions = [
   {
-    target: 'php-swagger',
-    label: 'DocBlock',
-    group: 'PHP',
-    description: 'PHPDoc annotations for swagger-php / l5-swagger.',
+    target: 'js-jsdoc',
+    label: 'JSDoc',
+    group: 'JavaScript',
+    description: 'JSDoc @openapi blocks (swagger-jsdoc).',
     isEnabled: true,
-    generator: new PhpSwaggerGenerator(),
-    supportedSpecs: ['swagger-2.0', 'openapi-3.0.3', 'openapi-3.1.0'] as SpecVersionId[],
+    generator: new JsJsDocGenerator(),
+    supportedSpecs: ['openapi-3.0.3', 'openapi-3.1.0'] as SpecVersionId[],
   },
   {
     target: 'php-attribute',
@@ -36,12 +37,21 @@ const definitions = [
     supportedSpecs: ['openapi-3.0.3', 'openapi-3.1.0'] as SpecVersionId[],
   },
   {
-    target: 'js-jsdoc',
-    label: 'JSDoc',
-    group: 'JavaScript',
-    description: 'JSDoc @openapi blocks (swagger-jsdoc).',
-    isEnabled: false,
-    generator: new JsJsDocGenerator(),
+    target: 'php-swagger',
+    label: 'DocBlock',
+    group: 'PHP',
+    description: 'PHPDoc annotations for swagger-php / l5-swagger.',
+    isEnabled: true,
+    generator: new PhpSwaggerGenerator(),
+    supportedSpecs: ['swagger-2.0', 'openapi-3.0.3', 'openapi-3.1.0'] as SpecVersionId[],
+  },
+  {
+    target: 'py-fastapi',
+    label: 'FastAPI',
+    group: 'Python',
+    description: 'Pydantic models and FastAPI route decorators.',
+    isEnabled: true,
+    generator: new PyFastApiGenerator(),
     supportedSpecs: ['openapi-3.0.3', 'openapi-3.1.0'] as SpecVersionId[],
   },
   {

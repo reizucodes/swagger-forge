@@ -18,8 +18,8 @@ interface Props {
 export default function PreviewPanel({ endpoint }: Props) {
   const [target, setTarget] = useState<AnnotationTarget>(() => {
     const saved = localStorage.getItem('sf:annotation-target')
-    const valid: AnnotationTarget[] = ['php-swagger', 'php-attribute', 'js-jsdoc', 'openapi-json']
-    return (valid.includes(saved as AnnotationTarget) ? saved : 'php-swagger') as AnnotationTarget
+    const valid: AnnotationTarget[] = ['php-swagger', 'php-attribute', 'js-jsdoc', 'openapi-json', 'py-fastapi']
+    return (valid.includes(saved as AnnotationTarget) ? saved : 'js-jsdoc') as AnnotationTarget
   })
   const [specVersionId, setSpecVersionId] = useState<SpecVersionId>(() => {
     const saved = localStorage.getItem('sf:spec-version') as SpecVersionId | null
@@ -178,6 +178,10 @@ export default function PreviewPanel({ endpoint }: Props) {
         </div>
       </div>
 
+      <div className="mb-2 text-xs text-[var(--gh-text-secondary)]">
+        Tip: {ANNOTATION_TIPS[target]}
+      </div>
+
       <pre className={`flex-1 overflow-auto p-4 border border-[var(--gh-border)] rounded font-mono text-sm bg-[var(--gh-code-bg)] text-[var(--gh-code-text)] ${wrap ? 'whitespace-pre-wrap' : 'whitespace-pre'}`}>
         {highlight
           ? tokenize(annotation, target).map((tok, i) => (
@@ -186,10 +190,6 @@ export default function PreviewPanel({ endpoint }: Props) {
           : annotation
         }
       </pre>
-
-      <div className="mt-3 text-xs text-[var(--gh-text-secondary)]">
-        Tip: {ANNOTATION_TIPS[target]}
-      </div>
     </div>
   )
 }

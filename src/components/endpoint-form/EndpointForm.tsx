@@ -238,7 +238,7 @@ export default function EndpointForm({ value, onChange, allowed, fromTester, onD
                   >
                     Preview
                   </button>
-                  <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 rounded text-xs whitespace-nowrap bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] text-[var(--gh-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity delay-100 z-50 max-w-[200px] text-center" style={{whiteSpace: 'normal', width: '160px'}}>
+                  <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 rounded text-xs bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] text-[var(--gh-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity delay-100 z-50 text-center max-w-[160px] max-w-[80vw]" style={{whiteSpace: 'normal', width: '160px'}}>
                     See the request body as a raw JSON object
                   </span>
                 </div>
@@ -251,7 +251,7 @@ export default function EndpointForm({ value, onChange, allowed, fromTester, onD
                   >
                     Import
                   </button>
-                  <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 rounded text-xs whitespace-nowrap bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] text-[var(--gh-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity delay-100 z-50 max-w-[200px] text-center" style={{whiteSpace: 'normal', width: '180px'}}>
+                  <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 rounded text-xs bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] text-[var(--gh-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity delay-100 z-50 text-center max-w-[180px] max-w-[80vw]" style={{whiteSpace: 'normal', width: '180px'}}>
                     Paste a JSON object to auto-fill the request body fields
                   </span>
                 </div>
@@ -262,9 +262,9 @@ export default function EndpointForm({ value, onChange, allowed, fromTester, onD
             </button>
           </div>
           {(value.requestBodyJsonFields || []).length > 0 && (
-            <div className="grid gap-2 mt-3 mb-1 px-3 grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,3fr)_auto_auto_auto]">
-              {['Field name', 'Type', 'Example', 'Req.', '', ''].map((label) => (
-                <span key={label} className="text-xs text-[var(--gh-text-secondary)] font-medium">{label}</span>
+            <div className="hidden sm:grid gap-2 mt-3 mb-1 px-3 grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,3fr)_auto_auto_auto] text-xs text-[var(--gh-text-secondary)] font-medium">
+              {['Field name', 'Type', 'Example', '', '', ''].map((label) => (
+                <span key={label}>{label}</span>
               ))}
             </div>
           )}

@@ -3,3 +3,4 @@ export type AnnotationTarget =
     | 'php-attribute'
     | 'js-jsdoc'
     | 'openapi-json'
+    | 'py-fastapi'

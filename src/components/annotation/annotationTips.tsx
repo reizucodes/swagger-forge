@@ -16,8 +16,9 @@ export const ANNOTATION_TIPS: Record<AnnotationTarget, JSX.Element> = {
   ),
   'js-jsdoc': (
     <>
-      Paste above your route handler. If you're using{' '}
-      <code>swagger-jsdoc</code>, keep the <code>@openapi</code> block close to the endpoint definition.
+      Paste above your route handler. Requires{' '}
+      <code>swagger-jsdoc</code> — works with Express, Fastify, Koa, or any Node.js framework.
+      Path uses OpenAPI syntax (<code>{'{id}'}</code>).
     </>
   ),
   'openapi-json': (
@@ -25,6 +26,11 @@ export const ANNOTATION_TIPS: Record<AnnotationTarget, JSX.Element> = {
       This is a native OpenAPI document. Save it as{' '}
       <code>openapi.json</code> and load it into Swagger UI, Postman,
       or use it to generate client SDKs.
+    </>
+  ),
+  'py-fastapi': (
+    <>
+      Paste into your router file. The Pydantic model captures the request body schema — add your handler function below the decorator.
     </>
   ),
 }
