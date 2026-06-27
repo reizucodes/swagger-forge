@@ -1,9 +1,10 @@
 import type { Endpoint } from "@/domain/endpoint/models/Endpoint"
 import type { AnnotationGenerator } from "@/core/annotation/contracts/AnnotationGenerator"
+import type { SpecVersion } from "@/core/annotation/specs"
 
 // Sample only
 export class JsJsDocGenerator implements AnnotationGenerator {
-    generate(e: Endpoint): string {
+    generate(e: Endpoint, _spec: SpecVersion): string {
         const lines: string[] = []
 
         lines.push('/**')

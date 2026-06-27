@@ -2,10 +2,13 @@ import { useState, useEffect } from 'react'
 import EndpointForm from '@/components/endpoint-form/EndpointForm'
 import PreviewPanel from '@/components/preview/PreviewPanel'
 import { useEndpointForm } from '@/hooks/useEndpointForm'
+import { HowToUseModal } from '@/components/modals/HowToUseModal'
 
 export default function App() {
   const { endpoint, update, allowed } = useEndpointForm()
   const year: number = new Date().getFullYear()
+
+  const [showHowTo, setShowHowTo] = useState(false)
 
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     return localStorage.getItem('theme') === 'light' ? 'light' : 'dark'
@@ -31,6 +34,18 @@ export default function App() {
             <h1 className="text-xl font-semibold tracking-tight text-[var(--gh-text-primary)]">apispec-forge</h1>
             <p className="text-sm text-[var(--gh-text-secondary)] mt-0.5">Build OpenAPI endpoint specs</p>
           </div>
+          <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowHowTo(true)}
+            aria-label="How to use"
+            className="p-2 rounded border border-[var(--gh-border)] text-[var(--gh-text-secondary)] hover:text-[var(--gh-text-primary)] hover:bg-[var(--gh-canvas-inset)] transition"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </button>
           <button
             onClick={toggleTheme}
             aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -56,12 +71,13 @@ export default function App() {
               </svg>
             )}
           </button>
+          </div>
         </div>
       </header>
 
       {/* Main Content */}
       <div className="flex-grow max-w-7xl mx-auto p-4 grid grid-cols-1 lg:grid-cols-2 gap-4 w-full">
-        <div className="bg-[var(--gh-canvas)] border border-[var(--gh-border-muted)] rounded shadow-sm overflow-auto text-sm">
+        <div className="bg-[var(--gh-canvas)] border border-[var(--gh-border-muted)] rounded shadow-sm overflow-x-hidden overflow-y-auto text-sm">
           <EndpointForm value={endpoint} onChange={update} allowed={allowed} />
         </div>
         <div className="bg-[var(--gh-canvas)] border border-[var(--gh-border-muted)] rounded shadow-sm overflow-auto">
@@ -73,6 +89,7 @@ export default function App() {
       <footer className="py-3 text-center text-xs text-[var(--gh-text-secondary)]">
         reizucodes © {year}
       </footer>
+      <HowToUseModal open={showHowTo} onClose={() => setShowHowTo(false)} />
     </div>
   )
 }
