@@ -82,7 +82,7 @@ export function EndpointTesterModal({ open, onClose, onApplyEndpoint }: Props) {
       onClick={onClose}
     >
       <div
-        className="bg-[var(--gh-canvas)] border border-[var(--gh-border)] rounded-lg w-full max-w-2xl max-h-[90vh] flex flex-col"
+        className="bg-[var(--gh-canvas)] border border-[var(--gh-border)] rounded-lg w-full max-w-2xl lg:max-w-4xl max-h-[90vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-between items-center px-3 sm:px-4 py-3 border-b border-[var(--gh-border)]">
