@@ -4,13 +4,13 @@ import { getGeneratorDefinition, listGeneratorDefinitions } from '@/core/annotat
 describe('generatorRegistry', () => {
   test('lists known generator targets', () => {
     const targets = listGeneratorDefinitions().map((d) => d.target)
-    expect(targets).toEqual(['php-swagger', 'js-jsdoc', 'openapi-json'])
+    expect(targets).toEqual(['php-swagger', 'php-attribute', 'js-jsdoc', 'openapi-json'])
   })
 
   test('can resolve generator by target', () => {
     const def = getGeneratorDefinition('php-swagger')
     expect(def.isEnabled).toBe(true)
-    expect(def.label).toMatch(/PHP/i)
+    expect(def.label).toMatch(/DocBlock/i)
   })
 })
 

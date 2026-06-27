@@ -20,10 +20,9 @@ describe('EMPTY_ENDPOINT', () => {
 })
 
 describe('SAMPLE_ENDPOINTS', () => {
-  const allEndpoints = [
-    ...Object.values(SAMPLE_ENDPOINTS.json),
-    ...Object.values(SAMPLE_ENDPOINTS.formData),
-  ]
+  const allEndpoints = Object.values(SAMPLE_ENDPOINTS).flatMap(samples =>
+    samples.map(s => s.endpoint)
+  )
 
   it('every parameter has a non-empty string id', () => {
     for (const endpoint of allEndpoints) {

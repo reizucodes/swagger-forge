@@ -45,19 +45,23 @@ export function ParameterField({ parameter, allowed, onChange, onRemove }: Props
                 </select>
 
                 {/* Required Toggle */}
-                <button
-                    type="button"
-                    title={parameter.required ? 'Required' : 'Optional'}
-                    aria-pressed={parameter.required}
-                    className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        parameter.required
-                            ? 'bg-[var(--gh-required-bg)] text-[var(--gh-required-text)]'
-                            : 'bg-[var(--gh-canvas-inset)] text-[var(--gh-text-secondary)]'
-                    }`}
-                    onClick={() => onChange({ ...parameter, required: !parameter.required })}
-                >
-                    {parameter.required ? 'Required' : 'Optional'}
-                </button>
+                <div className="relative group">
+                    <button
+                        type="button"
+                        aria-pressed={parameter.required}
+                        className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                            parameter.required
+                                ? 'bg-[var(--gh-required-bg)] text-[var(--gh-required-text)]'
+                                : 'bg-[var(--gh-canvas-inset)] text-[var(--gh-text-secondary)]'
+                        }`}
+                        onClick={() => onChange({ ...parameter, required: !parameter.required })}
+                    >
+                        {parameter.required ? 'Required' : 'Optional'}
+                    </button>
+                    <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-1.5 py-0.5 rounded text-xs whitespace-nowrap bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] text-[var(--gh-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity delay-100 z-50">
+                        {parameter.required ? 'Required' : 'Optional'}
+                    </span>
+                </div>
 
                 {/* Remove Button */}
                 <button

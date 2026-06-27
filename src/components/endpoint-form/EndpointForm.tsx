@@ -63,33 +63,22 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
           className="p-2 border border-[var(--gh-border)] rounded text-xs bg-[var(--gh-canvas-subtle)] text-[var(--gh-text-primary)] placeholder-[var(--gh-text-placeholder)] focus:outline-none"
           value={selectedSample}
           onChange={(e) => {
-            const key = e.target.value;
-            setSelectedSample(key);
-            if (!key) {
-              onChange(EMPTY_ENDPOINT)
-              return;
-            }
-            const sample = key.startsWith("json:")
-              ? SAMPLE_ENDPOINTS.json[key.replace("json:", "")]
-              : SAMPLE_ENDPOINTS.formData[key.replace("form:", "")];
-            if (sample) onChange(sample); // ponytail: bypass handleChange so sample selection keeps dropdown in sync
+            const key = e.target.value
+            setSelectedSample(key)
+            if (!key) { onChange(EMPTY_ENDPOINT); return }
+            const [method, idxStr] = key.split(':')
+            const sample = SAMPLE_ENDPOINTS[method]?.[Number(idxStr)]?.endpoint
+            if (sample) onChange(sample) // ponytail: bypass handleChange so sample selection keeps dropdown in sync
           }}
         >
           <option value="">Sample Requests</option>
-          <optgroup label="application/json">
-            {Object.keys(SAMPLE_ENDPOINTS.json).map(key => (
-              <option key={key} value={`json:${key}`}>
-                {key}
-              </option>
-            ))}
-          </optgroup>
-          <optgroup label="multipart/form-data">
-            {Object.keys(SAMPLE_ENDPOINTS.formData).map(key => (
-              <option key={key} value={`form:${key}`}>
-                {key}
-              </option>
-            ))}
-          </optgroup>
+          {Object.entries(SAMPLE_ENDPOINTS).map(([method, samples]) => (
+            <optgroup key={method} label={method.toUpperCase()}>
+              {samples.map((s, i) => (
+                <option key={i} value={`${method}:${i}`}>{s.hint ? `${s.label} · ${s.hint}` : s.label}</option>
+              ))}
+            </optgroup>
+          ))}
         </select>
         {/* Clear Button */}
         <button
@@ -136,11 +125,30 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
             onChange={e => handleChange({ ...value, security: { type: e.target.value as AuthType } })}
           >
             <option value="none">No auth</option>
-            <option value="sanctum">Sanctum</option>
-            <option value="jwt" disabled>JWT (coming soon)</option>
+            <optgroup label="General">
+              <option value="apiKey">API Key</option>
+              <option value="bearer">Bearer Token</option>
+            </optgroup>
+            <optgroup label="Platform">
+              <option value="jwt">JWT</option>
+              <option value="sanctum">Laravel Sanctum</option>
+            </optgroup>
           </select>
         </label>
       </div>
+
+      {/* API Key header name — shown only when apiKey auth is selected */}
+      {value.security?.type === 'apiKey' && (
+        <label className="flex flex-col text-[var(--gh-text-primary)]">
+          Header Name
+          <input
+            className="mt-1 p-2 rounded border border-[var(--gh-border)] bg-[var(--gh-canvas-subtle)] text-[var(--gh-text-primary)] placeholder-[var(--gh-text-placeholder)] focus:outline-none focus:ring-1 focus:ring-[var(--gh-border)] focus:border-[var(--gh-accent)]/50"
+            placeholder="e.g. X-API-Key"
+            value={value.security?.headerName ?? ''}
+            onChange={e => handleChange({ ...value, security: { ...value.security!, headerName: e.target.value } })}
+          />
+        </label>
+      )}
 
       {/* Basic Info */}
       {(['operationId', 'tags', 'summary', 'description'] as const).map((field) => {
@@ -215,20 +223,30 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
                 <option value="x-www-form-urlencoded" disabled>(coming soon)</option>
               </select>
               {value.requestBodyContentType === "application/json" && (
-                <button
-                  className="text-sm underline text-[var(--gh-accent)] hover:opacity-80"
-                  onClick={() => setShowJsonModal(true)}
-                >
-                  Preview JSON
-                </button>
+                <div className="relative group">
+                  <button
+                    className="text-sm underline text-[var(--gh-accent)] hover:opacity-80"
+                    onClick={() => setShowJsonModal(true)}
+                  >
+                    Preview
+                  </button>
+                  <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 rounded text-xs whitespace-nowrap bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] text-[var(--gh-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity delay-100 z-50 max-w-[200px] text-center" style={{whiteSpace: 'normal', width: '160px'}}>
+                    See the request body as a raw JSON object
+                  </span>
+                </div>
               )}
               {value.requestBodyContentType === "application/json" && (
-                <button
-                  className="text-sm underline text-[var(--gh-accent)] hover:opacity-80"
-                  onClick={() => setShowImportModal(true)}
-                >
-                  Import JSON
-                </button>
+                <div className="relative group">
+                  <button
+                    className="text-sm underline text-[var(--gh-accent)] hover:opacity-80"
+                    onClick={() => setShowImportModal(true)}
+                  >
+                    Import
+                  </button>
+                  <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 rounded text-xs whitespace-nowrap bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] text-[var(--gh-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity delay-100 z-50 max-w-[200px] text-center" style={{whiteSpace: 'normal', width: '180px'}}>
+                    Paste a JSON object to auto-fill the request body fields
+                  </span>
+                </div>
               )}
             </div>
             <button className="text-sm text-[var(--gh-accent)] underline hover:opacity-80" onClick={addRequestBodyField}>
@@ -292,6 +310,14 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
       <JsonImportModal
         open={showImportModal}
         onClose={() => { setShowImportModal(false); setImportError(''); }}
+        sample={JSON.stringify({
+          name: "Doggie",
+          status: "available",
+          category: {
+            id: 1,
+            name: "Dogs"
+          }
+        }, null, 2)}
         onImport={(jsonString) => {
           try {
             const parsed = JSON.parse(jsonString);

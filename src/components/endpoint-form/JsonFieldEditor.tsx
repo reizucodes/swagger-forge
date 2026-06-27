@@ -3,14 +3,26 @@ import type { JsonField } from "@/domain/endpoint/models/JsonField"
 import type { RequestBodyContentType, SchemaType } from "@/domain/endpoint/models/enums"
 import { applyJsonFieldPatch, getJsonFieldEditorRules } from "@/domain/endpoint/rules/jsonFieldEditing"
 
+// ponytail: fixed 3-stop palette; cycles at depth 3+ to avoid unbounded nesting styles
+const DEPTH_COLORS = [
+    { border: 'border-blue-500/40',   bg: '' },
+    { border: 'border-purple-500/40', bg: 'bg-blue-500/5' },
+    { border: 'border-amber-500/40',  bg: 'bg-purple-500/5' },
+    { border: 'border-amber-500/40',  bg: 'bg-amber-500/5' },
+]
+function getDepthStyle(depth: number) {
+    return DEPTH_COLORS[Math.min(depth, DEPTH_COLORS.length - 1)]
+}
+
 interface Props {
     field: JsonField
     onChange: (f: JsonField) => void
     onRemove: () => void
     contentType?: RequestBodyContentType
+    depth?: number
 }
 
-export function JsonFieldEditor({ field, onChange, onRemove, contentType }: Props) {
+export function JsonFieldEditor({ field, onChange, onRemove, contentType, depth = 0 }: Props) {
     const { allowedSchemaTypes, disableExample, disableChildren } = getJsonFieldEditorRules(field, contentType)
     const [showDescription, setShowDescription] = useState<boolean>(!!field.description)
 
@@ -29,8 +41,10 @@ export function JsonFieldEditor({ field, onChange, onRemove, contentType }: Prop
     const inputBase = "p-1 border border-[var(--gh-border)] rounded bg-[var(--gh-canvas)] text-[var(--gh-text-primary)] placeholder-[var(--gh-text-placeholder)] focus:outline-none text-sm w-full"
     const inputFocusRing = "focus:ring-1 focus:ring-[var(--gh-border)] focus:border-[var(--gh-accent)]/50"
 
+    const depthStyle = getDepthStyle(depth)
+
     return (
-        <div className="p-2 border border-[var(--gh-border-muted)] rounded bg-[var(--gh-canvas-subtle)] space-y-2">
+        <div className={`p-2 border border-[var(--gh-border-muted)] rounded bg-[var(--gh-canvas-subtle)] space-y-2${depthStyle.bg ? ` ${depthStyle.bg}` : ''}`}>
             <div className="grid gap-2 items-center grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,3fr)_auto_auto_auto]">
                 <input
                     className={`${inputBase} ${inputFocusRing}`}
@@ -56,33 +70,41 @@ export function JsonFieldEditor({ field, onChange, onRemove, contentType }: Prop
                     value={String(disableExample ? '' : field.example)}
                     onChange={e => onChange(applyJsonFieldPatch(field, { example: e.target.value }, contentType))}
                 />
-                <button
-                    type="button"
-                    title={field.required ? 'Required — click to make optional' : 'Optional — click to make required'}
-                    aria-label={field.required ? 'Mark as optional' : 'Mark as required'}
-                    onClick={() => onChange(applyJsonFieldPatch(field, { required: !field.required }, contentType))}
-                    className={`transition hover:opacity-80 ${field.required ? 'text-[var(--gh-accent)]' : 'text-[var(--gh-text-secondary)] opacity-40'}`}
-                >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        strokeWidth={field.required ? 2.5 : 1.5}
-                        strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="8" x2="12" y2="12"/>
-                        <line x1="12" y1="16" x2="12.01" y2="16"/>
-                    </svg>
-                </button>
-                <button
-                    type="button"
-                    title={showDescription ? 'Hide description' : 'Add description'}
-                    aria-label={showDescription ? 'Hide description' : 'Add description'}
-                    onClick={() => setShowDescription(v => !v)}
-                    className={`text-[var(--gh-text-secondary)] hover:opacity-80 transition ${showDescription ? 'opacity-100' : 'opacity-40'}`}
-                >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10"/>
-                        <text x="12" y="16.5" textAnchor="middle" fontStyle="italic" fontFamily="Georgia, serif" fontSize="11" fontWeight="bold" fill="currentColor" stroke="none">i</text>
-                    </svg>
-                </button>
+                <div className="relative group">
+                    <button
+                        type="button"
+                        aria-label={field.required ? 'Mark as optional' : 'Mark as required'}
+                        onClick={() => onChange(applyJsonFieldPatch(field, { required: !field.required }, contentType))}
+                        className={`transition hover:opacity-80 ${field.required ? 'text-[var(--gh-accent)]' : 'text-[var(--gh-text-secondary)] opacity-40'}`}
+                    >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            strokeWidth={field.required ? 2.5 : 1.5}
+                            strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                    </button>
+                    <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-1.5 py-0.5 rounded text-xs whitespace-nowrap bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] text-[var(--gh-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity delay-100 z-50">
+                        {field.required ? 'Required — click to make optional' : 'Optional — click to make required'}
+                    </span>
+                </div>
+                <div className="relative group">
+                    <button
+                        type="button"
+                        aria-label={showDescription ? 'Hide description' : 'Add description'}
+                        onClick={() => setShowDescription(v => !v)}
+                        className={`text-[var(--gh-text-secondary)] hover:opacity-80 transition ${showDescription ? 'opacity-100' : 'opacity-40'}`}
+                    >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <text x="12" y="16.5" textAnchor="middle" fontStyle="italic" fontFamily="Georgia, serif" fontSize="11" fontWeight="bold" fill="currentColor" stroke="none">i</text>
+                        </svg>
+                    </button>
+                    <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-1.5 py-0.5 rounded text-xs whitespace-nowrap bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] text-[var(--gh-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity delay-100 z-50">
+                        {showDescription ? 'Hide description' : 'Add description'}
+                    </span>
+                </div>
                 <button
                     aria-label="Remove field"
                     className="text-[var(--gh-danger)] hover:opacity-80"
@@ -103,7 +125,7 @@ export function JsonFieldEditor({ field, onChange, onRemove, contentType }: Prop
             )}
 
             {(field.schemaType === 'array' || field.schemaType === 'object') && contentType !== "multipart/form-data" && (
-                <div className="ml-4 border-l border-[var(--gh-border)] pl-4 space-y-2">
+                <div className={`ml-4 border-l ${depthStyle.border} pl-4 space-y-2`}>
                     <div className="flex justify-between items-center">
                         <span className="text-xs text-[var(--gh-text-secondary)]">
                             Children
@@ -139,6 +161,7 @@ export function JsonFieldEditor({ field, onChange, onRemove, contentType }: Prop
                             onChange={(updated) => updateChild(i, updated)}
                             onRemove={() => removeChild(i)}
                             contentType={contentType}
+                            depth={depth + 1}
                         />
                     ))}
                 </div>

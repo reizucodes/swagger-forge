@@ -1,0 +1,9 @@
+{
+  "id": "swagger-2.0",
+  "label": "Swagger 2.0",
+  "openApiVersionKey": "swagger",
+  "openApiVersionValue": "2.0",
+  "nullable": "nullable-field",
+  "requestBodyStyle": "body-parameter",
+  "securityKey": "securityDefinitions"
+}
