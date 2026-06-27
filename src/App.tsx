@@ -3,12 +3,15 @@ import EndpointForm from '@/components/endpoint-form/EndpointForm'
 import PreviewPanel from '@/components/preview/PreviewPanel'
 import { useEndpointForm } from '@/hooks/useEndpointForm'
 import { HowToUseModal } from '@/components/modals/HowToUseModal'
+import { EndpointTesterModal } from '@/components/tester/EndpointTesterModal'
 
 export default function App() {
   const { endpoint, update, allowed } = useEndpointForm()
   const year: number = new Date().getFullYear()
 
   const [showHowTo, setShowHowTo] = useState(false)
+  const [testerOpen, setTesterOpen] = useState(false)
+  const [fromTester, setFromTester] = useState(false)
 
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     return localStorage.getItem('theme') === 'light' ? 'light' : 'dark'
@@ -35,6 +38,13 @@ export default function App() {
             <p className="text-sm text-[var(--gh-text-secondary)] mt-0.5">Build OpenAPI endpoint specs</p>
           </div>
           <div className="flex items-center gap-2">
+          <button
+            onClick={() => setTesterOpen(true)}
+            className="px-3 py-1.5 rounded border border-[var(--gh-accent)] text-[var(--gh-accent)] text-sm hover:bg-[var(--gh-accent)]/10 transition flex items-center gap-1.5"
+          >
+            Test Endpoint
+            <span className="text-[10px] font-semibold px-1 py-0.5 rounded bg-[var(--gh-accent)]/15 text-[var(--gh-accent)] leading-none">Beta</span>
+          </button>
           <button
             onClick={() => setShowHowTo(true)}
             aria-label="How to use"
@@ -78,7 +88,7 @@ export default function App() {
       {/* Main Content */}
       <div className="flex-grow max-w-7xl mx-auto p-4 grid grid-cols-1 lg:grid-cols-2 gap-4 w-full">
         <div className="bg-[var(--gh-canvas)] border border-[var(--gh-border-muted)] rounded shadow-sm overflow-x-hidden overflow-y-auto text-sm">
-          <EndpointForm value={endpoint} onChange={update} allowed={allowed} />
+          <EndpointForm value={endpoint} onChange={(v) => { setFromTester(false); update(v) }} allowed={allowed} fromTester={fromTester} onDismissTip={() => setFromTester(false)} />
         </div>
         <div className="bg-[var(--gh-canvas)] border border-[var(--gh-border-muted)] rounded shadow-sm overflow-auto">
           <PreviewPanel endpoint={endpoint} />
@@ -90,6 +100,11 @@ export default function App() {
         reizucodes © {year}
       </footer>
       <HowToUseModal open={showHowTo} onClose={() => setShowHowTo(false)} />
+      <EndpointTesterModal
+        open={testerOpen}
+        onClose={() => setTesterOpen(false)}
+        onApplyEndpoint={(patch) => { update(patch); setTesterOpen(false); setFromTester(true) }}
+      />
     </div>
   )
 }
