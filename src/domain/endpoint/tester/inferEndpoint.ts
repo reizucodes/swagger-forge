@@ -25,6 +25,7 @@ export function inferEndpoint(state: InferState, response: InferResponse): Parti
   } catch {
     path = state.url
   }
+  path = path.replace(/\{\{[^}]*\}\}/g, '')
 
   const paramNames = parsePathParams(path)
   const parameters: Parameter[] = paramNames.map(name => ({

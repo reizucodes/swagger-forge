@@ -20,5 +20,18 @@ describe('generateAnnotation', () => {
     expect(out).toContain('path="/pets/{id}"')
     expect(out).toContain('@OA\\Parameter')
   })
+
+  test('strips {{envVar}} placeholders from path before generating output', () => {
+    const endpoint: Endpoint = {
+      method: 'get',
+      path: '{{fsdev}}/health-status',
+      summary: 'Health check',
+      responses: [{ id: crypto.randomUUID(), code: '200', description: 'OK' }],
+    }
+
+    const out = generateAnnotation(endpoint, 'php-swagger', getSpecVersion('openapi-3.0.3'))
+    expect(out).not.toContain('{{fsdev}}')
+    expect(out).toContain('path="/health-status"')
+  })
 })
 
