@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { generateAnnotation } from '@/core/annotation/generateAnnotation'
+import { getSpecVersion } from '@/core/annotation/specs'
 import type { Endpoint } from '@/domain/endpoint/models/Endpoint'
 
 describe('generateAnnotation', () => {
@@ -14,7 +15,7 @@ describe('generateAnnotation', () => {
       responses: [{ id: crypto.randomUUID(), code: '200', description: 'Success' }],
     }
 
-    const out = generateAnnotation(endpoint, 'php-swagger')
+    const out = generateAnnotation(endpoint, 'php-swagger', getSpecVersion('openapi-3.0.3'))
     expect(out).toContain('@OA\\Get')
     expect(out).toContain('path="/pets/{id}"')
     expect(out).toContain('@OA\\Parameter')

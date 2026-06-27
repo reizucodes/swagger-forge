@@ -1,0 +1,9 @@
+{
+  "id": "openapi-3.0.3",
+  "label": "OpenAPI 3.0.3",
+  "openApiVersionKey": "openapi",
+  "openApiVersionValue": "3.0.3",
+  "nullable": "nullable-field",
+  "requestBodyStyle": "request-body",
+  "securityKey": "components"
+}

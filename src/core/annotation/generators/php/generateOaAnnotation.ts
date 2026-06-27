@@ -1,5 +1,6 @@
 import type { Endpoint } from "@/domain/endpoint/models/Endpoint"
 import type { JsonField } from "@/domain/endpoint/models/JsonField"
+import type { SpecVersion } from '@/core/annotation/specs'
 
 const indent = (n = 1) => ' '.repeat(n * 4)
 
@@ -7,7 +8,7 @@ function escapeForPhpString(s: string): string {
     return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
 }
 
-export function generateOaAnnotation(e: Endpoint): string {
+export function generateOaAnnotation(e: Endpoint, spec: SpecVersion): string {
     const lines: string[] = []
     const method = e.method.toUpperCase()
 
@@ -15,7 +16,15 @@ export function generateOaAnnotation(e: Endpoint): string {
     lines.push(`*${indent()}@OA\\${capitalize(method)}(`)
     lines.push(`*${indent(2)}path="${escapeForPhpString(e.path)}",`)
 
-    if (e.security?.type === 'sanctum') lines.push(`*${indent(2)}security={{"sanctum": {}}},`)
+    if (e.security?.type === 'sanctum') {
+        lines.push(`*${indent(2)}security={{"sanctum": {}}},`)
+    } else if (e.security?.type === 'bearer') {
+        lines.push(`*${indent(2)}security={{"bearerAuth": {}}},`)
+    } else if (e.security?.type === 'apiKey') {
+        lines.push(`*${indent(2)}security={{"apiKeyAuth": {}}},`)
+    } else if (e.security?.type === 'jwt') {
+        lines.push(`*${indent(2)}security={{"jwt": {}}},`)
+    }
     if (e.operationId) lines.push(`*${indent(2)}operationId="${escapeForPhpString(e.operationId)}",`)
     if (e.tags) lines.push(`*${indent(2)}tags={"${escapeForPhpString(e.tags)}"},`)
     if (e.summary) lines.push(`*${indent(2)}summary="${escapeForPhpString(e.summary)}",`)
@@ -34,39 +43,48 @@ export function generateOaAnnotation(e: Endpoint): string {
 
     // Request Body
     if (e.method !== 'get' && e.requestBodyJsonFields?.length) {
-        lines.push(`*${indent(2)}@OA\\RequestBody(`)
-        lines.push(`*${indent(3)}required=true,`)
-
-        // Decide which OpenAPI annotation to use based on content type
-        if (e.requestBodyContentType === 'application/json') {
-            lines.push(`*${indent(3)}@OA\\JsonContent(`)
+        if (spec.requestBodyStyle === 'body-parameter') {
+            lines.push(`*${indent(2)}@OA\\Parameter(`)
+            lines.push(`*${indent(3)}in="body",`)
+            lines.push(`*${indent(3)}name="body",`)
+            lines.push(`*${indent(3)}required=true,`)
+            lines.push(`*${indent(3)}@OA\\Schema(`)
             e.requestBodyJsonFields.forEach((f) => {
                 lines.push(...renderJsonField(f, 4))
             })
             lines.push(`*${indent(3)}),`)
-        } else if (e.requestBodyContentType === 'multipart/form-data') {
-            lines.push(`*${indent(3)}@OA\\MediaType(`)
-            lines.push(`*${indent(4)}mediaType="multipart/form-data",`)
-            lines.push(`*${indent(4)}@OA\\Schema(`)
-
-            e.requestBodyJsonFields.forEach((f) => {
-                lines.push(...renderJsonField(f, 5))
-            })
-
-            lines.push(`*${indent(4)}),`)
-            lines.push(`*${indent(3)}),`)
-
+            lines.push(`*${indent(2)}),`)
         } else {
-            // Fallback (optional)
-            // TODO add support for x-www-form-urlencoded format
-            lines.push(`*${indent(3)}@OA\\JsonContent(`)
-            e.requestBodyJsonFields.forEach((f) => {
-                lines.push(...renderJsonField(f, 4))
-            })
-            lines.push(`*${indent(3)}),`)
-        }
+            lines.push(`*${indent(2)}@OA\\RequestBody(`)
+            lines.push(`*${indent(3)}required=true,`)
 
-        lines.push(`*${indent(2)}),`)
+            if (e.requestBodyContentType === 'application/json') {
+                lines.push(`*${indent(3)}@OA\\JsonContent(`)
+                e.requestBodyJsonFields.forEach((f) => {
+                    lines.push(...renderJsonField(f, 4))
+                })
+                lines.push(`*${indent(3)}),`)
+            } else if (e.requestBodyContentType === 'multipart/form-data') {
+                lines.push(`*${indent(3)}@OA\\MediaType(`)
+                lines.push(`*${indent(4)}mediaType="multipart/form-data",`)
+                lines.push(`*${indent(4)}@OA\\Schema(`)
+
+                e.requestBodyJsonFields.forEach((f) => {
+                    lines.push(...renderJsonField(f, 5))
+                })
+
+                lines.push(`*${indent(4)}),`)
+                lines.push(`*${indent(3)}),`)
+            } else {
+                lines.push(`*${indent(3)}@OA\\JsonContent(`)
+                e.requestBodyJsonFields.forEach((f) => {
+                    lines.push(...renderJsonField(f, 4))
+                })
+                lines.push(`*${indent(3)}),`)
+            }
+
+            lines.push(`*${indent(2)}),`)
+        }
     }
 
     // Responses
@@ -76,7 +94,17 @@ export function generateOaAnnotation(e: Endpoint): string {
         e.responses.forEach((r) => {
             const code = r.code ?? '200'
             const desc = escapeForPhpString(r.description ?? 'Success')
-            lines.push(`*${indent(2)}@OA\\Response(response=${code}, description="${desc}"),`)
+            if (r.schema?.length) {
+                lines.push(`*${indent(2)}@OA\\Response(`)
+                lines.push(`*${indent(3)}response=${code},`)
+                lines.push(`*${indent(3)}description="${desc}",`)
+                lines.push(`*${indent(3)}@OA\\JsonContent(`)
+                r.schema.forEach(f => lines.push(...renderJsonField(f, 4)))
+                lines.push(`*${indent(3)}),`)
+                lines.push(`*${indent(2)}),`)
+            } else {
+                lines.push(`*${indent(2)}@OA\\Response(response=${code}, description="${desc}"),`)
+            }
         })
     }
 
