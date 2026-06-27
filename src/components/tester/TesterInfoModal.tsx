@@ -46,7 +46,7 @@ export function TesterInfoModal({ open, onClose }: Props) {
                 ['Set a body', 'For POST / PUT / PATCH, provide a raw JSON body under the Body tab.'],
                 ['Send', 'Hit Send and review the status code, response headers, and body.'],
                 ['Read the response', 'Prettify or toggle wrap for large payloads. Copy the body to clipboard if needed.'],
-                ['Create doc', 'Click "Create doc from this" to import the method, path, request body, and response into your spec form.'],
+                ['Import to Builder', 'Click "Import to Builder" to import the method, path, request body, and response into your spec form.'],
               ] as [string, string][]).map(([title, detail], i) => (
                 <li key={i} className="flex gap-3">
                   <span className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] text-xs flex items-center justify-center text-[var(--gh-text-secondary)] font-medium">
