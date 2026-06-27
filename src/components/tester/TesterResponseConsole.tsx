@@ -162,13 +162,13 @@ function ResponseBody({ response, headerCount, prettyBody, tokens, isHtml, onCre
 
       <button
         onClick={() => {
-          if (window.confirm('This will overwrite your current endpoint form with data from this response. Continue?')) {
+          if (window.confirm('This will overwrite your current builder form with data from this response. Continue?')) {
             onCreateDoc()
           }
         }}
         className="w-full py-2 rounded bg-[var(--gh-accent)] text-white text-sm font-medium hover:opacity-90 transition shrink-0"
       >
-        Create doc from this
+        Import to Builder
       </button>
     </div>
   )
