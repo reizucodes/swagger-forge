@@ -18,9 +18,11 @@ interface Props {
   value: Endpoint
   onChange: (v: Endpoint) => void
   allowed: { path: boolean; query: boolean; body: boolean }
+  fromTester?: boolean
+  onDismissTip?: () => void
 }
 
-export default function EndpointForm({ value, onChange, allowed }: Props) {
+export default function EndpointForm({ value, onChange, allowed, fromTester, onDismissTip }: Props) {
   const [showJsonModal, setShowJsonModal] = useState<boolean>(false);
   const [showImportModal, setShowImportModal] = useState<boolean>(false);
   const [selectedSample, setSelectedSample] = useState<string>('');
@@ -57,6 +59,12 @@ export default function EndpointForm({ value, onChange, allowed }: Props) {
 
   return (
     <div className="p-4 space-y-4">
+      {fromTester && (
+        <div className="flex items-start justify-between gap-2 px-3 py-2 rounded border border-yellow-500/40 bg-yellow-500/10 text-xs text-yellow-400">
+          <span>Endpoint imported from test. Fill in <strong>OperationId</strong>, <strong>Tags</strong>, <strong>Summary</strong>, and <strong>Description</strong> to complete your doc.</span>
+          <button onClick={onDismissTip} className="shrink-0 hover:opacity-70 transition" aria-label="Dismiss">✕</button>
+        </div>
+      )}
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         {/* Sample Request Selector */}
         <select
