@@ -8,7 +8,7 @@ export function TesterInfoModal({ open, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4" onClick={onClose}>
-      <div className="bg-[var(--gh-canvas)] border border-[var(--gh-border)] rounded-lg p-4 w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+      <div className="bg-[var(--gh-canvas)] border border-[var(--gh-border)] rounded-lg p-4 w-full max-w-lg lg:max-w-2xl" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-3 pb-3 border-b border-[var(--gh-border)]">
           <h2 className="font-semibold text-lg text-[var(--gh-text-primary)] flex items-center gap-2">
             Test Endpoint
@@ -40,7 +40,7 @@ export function TesterInfoModal({ open, onClose }: Props) {
             <h3 className="font-semibold text-[var(--gh-text-primary)] mb-2">How to use</h3>
             <ol className="flex flex-col gap-2.5">
               {([
-                ['Set method & URL', 'Choose GET, POST, PUT, PATCH, or DELETE and enter the full endpoint URL.'],
+                ['Set method & URL', 'Choose GET, POST, PUT, PATCH, or DELETE and enter the full endpoint URL. Use {{varName}} to reference environment variables.'],
                 ['Configure auth', 'Add a Bearer token or API key under the Auth tab if your endpoint requires it.'],
                 ['Add headers', 'Inject any custom request headers under the Headers tab.'],
                 ['Set a body', 'For POST / PUT / PATCH, provide a raw JSON body under the Body tab.'],
@@ -65,18 +65,20 @@ export function TesterInfoModal({ open, onClose }: Props) {
             <section className="flex-1">
               <h3 className="font-semibold text-[var(--gh-text-primary)] mb-2">What's supported</h3>
               <ul className="flex flex-col gap-1.5">
-                {[
-                  'GET, POST, PUT, PATCH, DELETE methods',
-                  'Bearer token and API key authentication',
-                  'Custom request headers',
-                  'Raw JSON request body',
-                  'JSON response syntax highlighting and prettify',
-                  'Wrap / no-wrap toggle for long responses',
-                  'Copy response body to clipboard',
-                ].map((item, i) => (
+                {([
+                  ['GET, POST, PUT, PATCH, DELETE methods', false],
+                  ['Bearer token and API key authentication', false],
+                  ['Custom request headers', false],
+                  ['Raw JSON request body', false],
+                  ['JSON response syntax highlighting and prettify', false],
+                  ['Wrap / no-wrap toggle for long responses', false],
+                  ['Copy response body to clipboard', false],
+                  ['Environment variables', true],
+                ] as [string, boolean][]).map(([item, beta], i) => (
                   <li key={i} className="flex items-start gap-2 text-[var(--gh-text-secondary)]">
                     <span className="mt-0.5 text-green-400 shrink-0">✓</span>
                     {item}
+                    {beta && <span className="text-[10px] font-semibold px-1 py-0.5 rounded bg-[var(--gh-accent)]/15 text-[var(--gh-accent)] leading-none shrink-0">Beta</span>}
                   </li>
                 ))}
               </ul>
@@ -89,7 +91,6 @@ export function TesterInfoModal({ open, onClose }: Props) {
                   'Multipart/form-data and file uploads',
                   'Response schema validation',
                   'Request history',
-                  'Environment variables',
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-2 text-[var(--gh-text-secondary)]">
                     <span className="mt-0.5 text-[var(--gh-text-secondary)] opacity-50 shrink-0">✗</span>

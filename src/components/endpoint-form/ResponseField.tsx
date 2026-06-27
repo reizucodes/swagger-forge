@@ -92,7 +92,7 @@ export function ResponseField({ response, onChange, onRemove }: Props) {
                     ))}
                 </select>
                 <input
-                    className="flex-1 min-w-[120px] p-1 border border-[var(--gh-border)] rounded bg-[var(--gh-canvas)] text-[var(--gh-text-primary)] placeholder-[var(--gh-text-placeholder)] focus:outline-none focus:ring-1 focus:ring-[var(--gh-border)] focus:border-[var(--gh-accent)]/50"
+                    className="flex-1 min-w-0 p-1 border border-[var(--gh-border)] rounded bg-[var(--gh-canvas)] text-[var(--gh-text-primary)] placeholder-[var(--gh-text-placeholder)] focus:outline-none focus:ring-1 focus:ring-[var(--gh-border)] focus:border-[var(--gh-accent)]/50"
                     placeholder="Description"
                     value={response.description || ''}
                     onChange={e => onChange({ ...response, description: e.target.value })}
@@ -121,15 +121,16 @@ export function ResponseField({ response, onChange, onRemove }: Props) {
             {open && (
                 <div className="ml-2 mt-2 border-l border-[var(--gh-border)] pl-3 space-y-2">
                     {schema.length > 0 && (
-                        <div className="grid gap-2 items-center grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,3fr)_auto_auto_auto] text-xs text-[var(--gh-text-secondary)] px-2">
+                        <div className="hidden sm:grid gap-2 items-center grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,3fr)_auto_auto_auto] text-xs text-[var(--gh-text-secondary)] px-2">
                             <span>Field name</span>
                             <span>Type</span>
                             <span>Example</span>
-                            <span>Req.</span>
+                            <span></span>
                             <span></span>
                             <span></span>
                         </div>
                     )}
+                    <div className="space-y-2">
                     {schema.map((f, i) => (
                         <JsonFieldEditor
                             key={f.id ?? i}
@@ -140,6 +141,7 @@ export function ResponseField({ response, onChange, onRemove }: Props) {
                             depth={0}
                         />
                     ))}
+                    </div>
                     <div className="flex items-center gap-3">
                         <button
                             type="button"

@@ -5,7 +5,7 @@ import type { SpecVersion } from '@/core/annotation/specs'
 const indent = (n = 1) => ' '.repeat(n * 4)
 
 function escapeForPhpString(s: string): string {
-    return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+    return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\r/g, '').replace(/\n/g, '\\n')
 }
 
 export function generateOaAnnotation(e: Endpoint, spec: SpecVersion): string {
@@ -168,8 +168,8 @@ function renderJsonField(field: JsonField, depth = 3): string[] {
 
             lines.push(`*${pad}${indent(1)}example={${formatted.join(',')}},`);
         } else {
-            lines.push(`*${pad}${indent(1)}example="${escapeForPhpString(String(field.example))}",`
-            );
+            const exampleStr = escapeForPhpString(String(field.example))
+            lines.push(`*${pad}${indent(1)}example="${exampleStr}",`)
         }
     }
 
