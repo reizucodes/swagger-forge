@@ -1,73 +1,72 @@
-# React + TypeScript + Vite
+# apispec-forge
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A client-side tool for designing REST API endpoints and generating framework-ready annotations and OpenAPI specs — no backend, no sign-up, runs entirely in the browser.
 
-Currently, two official plugins are available:
+**Live:** [api-spec.reizucodes.com](https://api-spec.reizucodes.com)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## What it does
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Fill in your endpoint details — method, path, parameters, request body, responses — and get a ready-to-paste annotation for your framework of choice. Switch between output formats and spec versions without re-entering anything.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Output formats
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+| Format | Target |
+|---|---|
+| PHP DocBlock | swagger-php / l5-swagger |
+| PHP Attributes (PHP 8+) | swagger-php v4+ |
+| OpenAPI JSON | Any OpenAPI-compatible tooling |
+| JS JSDoc | swagger-jsdoc *(coming soon)* |
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Spec versions
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+| Version | Notes |
+|---|---|
+| Swagger 2.0 | Legacy format, still common in older Laravel setups |
+| OpenAPI 3.0.3 | Current stable, widest tooling support |
+| OpenAPI 3.1.0 | Latest, aligns with JSON Schema 2020-12 |
+
+Each version produces structurally correct output — `requestBody` vs `in: body`, `components.securitySchemes` vs `securityDefinitions`, nullable type handling, etc.
+
+---
+
+## Development
+
+```bash
+npm install
+npm run dev       # Vite dev server with HMR
+npm run build     # Type-check + production bundle
+npm run lint      # ESLint
+npm run test      # Vitest
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Architecture
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Clean Architecture — four layers, no framework lock-in:
+
 ```
+src/
+  domain/endpoint/        # Pure models and business rules
+  application/endpoint/   # Use-case orchestration
+  core/annotation/        # Generator infrastructure
+    specs/                # Per-version spec definitions (JSON)
+    generators/           # php/, openapi/, js/
+    registry/             # Central generator lookup
+  components/             # React UI
+  hooks/                  # useEndpointForm
+```
+
+Adding a new output format: implement `AnnotationGenerator`, register in `generatorRegistry.ts`.
+
+Adding a new spec version: add a JSON file to `src/core/annotation/specs/`, import it in `index.ts`.
+
+---
+
+## Format reference
+
+See [`docs/formats/`](docs/formats/) for field-by-field documentation on each output format.
