@@ -50,7 +50,7 @@ export function TesterBodyTab({ method, body, onChange }: Props) {
         value={body}
         onChange={e => { onChange(e.target.value); setPrettifyError(null) }}
         placeholder='{"key": "value"}'
-        className="w-full h-40 bg-[var(--gh-code-bg)] border border-[var(--gh-border)] rounded p-2 text-sm font-mono text-[var(--gh-code-text)] focus:outline-none focus:ring-1 focus:ring-[var(--gh-border)] focus:border-[var(--gh-accent)]/50 resize-y"
+        className="w-full min-h-[8rem] h-40 bg-[var(--gh-code-bg)] border border-[var(--gh-border)] rounded p-2 text-sm font-mono text-[var(--gh-code-text)] focus:outline-none focus:ring-1 focus:ring-[var(--gh-border)] focus:border-[var(--gh-accent)]/50 resize-y"
       />
       <p className="text-xs text-[var(--gh-text-secondary)]">
         Only JSON body is supported. <span className="opacity-70">Multipart/form-data is not supported in this version.</span>

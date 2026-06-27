@@ -7,6 +7,7 @@ import { TesterHeadersTab } from './TesterHeadersTab'
 import { TesterBodyTab } from './TesterBodyTab'
 import { TesterResponseConsole } from './TesterResponseConsole'
 import { TesterInfoModal } from './TesterInfoModal'
+import { TesterEnvPanel } from './TesterEnvPanel'
 
 interface Props {
   open: boolean
@@ -32,6 +33,10 @@ export function EndpointTesterModal({ open, onClose, onApplyEndpoint }: Props) {
     loadSample,
     reset,
     getEndpointPatch,
+    envVariables,
+    addEnvVariable,
+    updateEnvVariable,
+    removeEnvVariable,
   } = useEndpointTester()
 
   const [tabPanelHeight, setTabPanelHeight] = useState(140)
@@ -46,7 +51,8 @@ export function EndpointTesterModal({ open, onClose, onApplyEndpoint }: Props) {
     const onMove = (ev: MouseEvent) => {
       if (!isDragging.current) return
       const delta = ev.clientY - dragStartY.current
-      setTabPanelHeight(Math.min(400, Math.max(60, dragStartHeight.current + delta)))
+      const maxPx = Math.floor(window.innerHeight * 0.8)
+      setTabPanelHeight(Math.min(maxPx, Math.max(60, dragStartHeight.current + delta)))
     }
     const onUp = () => {
       isDragging.current = false
@@ -76,15 +82,15 @@ export function EndpointTesterModal({ open, onClose, onApplyEndpoint }: Props) {
       onClick={onClose}
     >
       <div
-        className="bg-[var(--gh-canvas)] border border-[var(--gh-border)] rounded-lg w-full max-w-2xl h-[680px] flex flex-col"
+        className="bg-[var(--gh-canvas)] border border-[var(--gh-border)] rounded-lg w-full max-w-2xl max-h-[90vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center px-4 py-3 border-b border-[var(--gh-border)]">
-          <h2 className="font-semibold text-lg text-[var(--gh-text-primary)] flex items-center gap-2">
+        <div className="flex justify-between items-center px-3 sm:px-4 py-3 border-b border-[var(--gh-border)]">
+          <h2 className="font-semibold text-base sm:text-lg text-[var(--gh-text-primary)] flex items-center gap-2">
             Test Endpoint
             <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[var(--gh-accent)]/15 text-[var(--gh-accent)] leading-none">Beta</span>
           </h2>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <button
               onClick={reset}
               className="text-xs text-[var(--gh-text-secondary)] underline hover:text-[var(--gh-text-primary)] transition"
@@ -125,6 +131,13 @@ export function EndpointTesterModal({ open, onClose, onApplyEndpoint }: Props) {
           </div>
         </div>
 
+        <TesterEnvPanel
+          variables={envVariables}
+          onAdd={addEnvVariable}
+          onUpdate={updateEnvVariable}
+          onRemove={removeEnvVariable}
+        />
+
         <TesterRequestBar
           method={state.method}
           url={state.url}
@@ -132,6 +145,8 @@ export function EndpointTesterModal({ open, onClose, onApplyEndpoint }: Props) {
           onMethodChange={setMethod}
           onUrlChange={setUrl}
           onSend={send}
+          resolveWarnings={state.resolveWarnings}
+          envNames={envVariables.map(v => v.name)}
         />
 
         <div className="px-4 py-1.5 flex items-center gap-1.5 text-xs text-[var(--gh-text-secondary)]">
@@ -160,7 +175,7 @@ export function EndpointTesterModal({ open, onClose, onApplyEndpoint }: Props) {
           ))}
         </div>
 
-        <div className="overflow-y-auto shrink-0" style={{ height: tabPanelHeight }}>
+        <div className="overflow-y-auto shrink-0 max-h-[35vh] sm:max-h-none" style={{ height: tabPanelHeight }}>
           {activeTab === 'auth' && (
             <TesterAuthTab auth={state.auth} onChange={setAuth} />
           )}
@@ -179,7 +194,7 @@ export function EndpointTesterModal({ open, onClose, onApplyEndpoint }: Props) {
 
         <div
           onMouseDown={onDragStart}
-          className="h-2 shrink-0 flex items-center justify-center cursor-row-resize border-y border-[var(--gh-border)] bg-[var(--gh-canvas-subtle)] hover:bg-[var(--gh-canvas-inset)] transition-colors group"
+          className="hidden sm:flex h-2 shrink-0 items-center justify-center cursor-row-resize border-y border-[var(--gh-border)] bg-[var(--gh-canvas-subtle)] hover:bg-[var(--gh-canvas-inset)] transition-colors group"
         >
           <div className="flex gap-0.5">
             <span className="w-4 h-0.5 rounded-full bg-[var(--gh-border)] group-hover:bg-[var(--gh-text-secondary)] transition-colors" />

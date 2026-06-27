@@ -8,7 +8,7 @@ export function TesterInfoModal({ open, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4" onClick={onClose}>
-      <div className="bg-[var(--gh-canvas)] border border-[var(--gh-border)] rounded-lg p-4 w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+      <div className="bg-[var(--gh-canvas)] border border-[var(--gh-border)] rounded-lg p-4 w-full max-w-lg" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-3 pb-3 border-b border-[var(--gh-border)]">
           <h2 className="font-semibold text-lg text-[var(--gh-text-primary)] flex items-center gap-2">
             Test Endpoint
