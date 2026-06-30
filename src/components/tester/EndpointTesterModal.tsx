@@ -84,6 +84,12 @@ export function EndpointTesterModal({ open, onClose, onApplyEndpoint }: Props) {
       <div
         className="bg-[var(--gh-canvas)] border border-[var(--gh-border)] rounded-lg w-full max-w-2xl lg:max-w-4xl max-h-[90vh] flex flex-col"
         onClick={e => e.stopPropagation()}
+        onKeyDown={e => {
+          if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && state.status !== 'sending' && state.url.trim()) {
+            e.preventDefault()
+            send()
+          }
+        }}
       >
         <div className="flex justify-between items-center px-3 sm:px-4 py-3 border-b border-[var(--gh-border)]">
           <h2 className="font-semibold text-base sm:text-lg text-[var(--gh-text-primary)] flex items-center gap-2">
@@ -147,6 +153,12 @@ export function EndpointTesterModal({ open, onClose, onApplyEndpoint }: Props) {
           onSend={send}
           resolveWarnings={state.resolveWarnings}
           envNames={envVariables.map(v => v.name)}
+          envMap={Object.fromEntries(envVariables.filter(v => v.name.trim()).map(v => [v.name, v.value]))}
+          envVariables={envVariables}
+          onUpdateEnvValue={(name, value) => {
+            const v = envVariables.find(ev => ev.name === name)
+            if (v) updateEnvVariable(v.id, 'value', value)
+          }}
         />
 
         <div className="px-4 py-1.5 flex items-center gap-1.5 text-xs text-[var(--gh-text-secondary)]">
@@ -177,7 +189,7 @@ export function EndpointTesterModal({ open, onClose, onApplyEndpoint }: Props) {
 
         <div className="overflow-y-auto shrink-0 max-h-[35vh] sm:max-h-none" style={{ height: tabPanelHeight }}>
           {activeTab === 'auth' && (
-            <TesterAuthTab auth={state.auth} onChange={setAuth} />
+            <TesterAuthTab auth={state.auth} onChange={setAuth} envNames={envVariables.map(v => v.name)} />
           )}
           {activeTab === 'headers' && (
             <TesterHeadersTab
@@ -185,6 +197,7 @@ export function EndpointTesterModal({ open, onClose, onApplyEndpoint }: Props) {
               onAdd={addHeader}
               onUpdate={updateHeader}
               onRemove={removeHeader}
+              envNames={envVariables.map(v => v.name)}
             />
           )}
           {activeTab === 'body' && (
@@ -207,6 +220,7 @@ export function EndpointTesterModal({ open, onClose, onApplyEndpoint }: Props) {
             status={state.status}
             errorMessage={state.errorMessage}
             response={state.response}
+            requestSnapshot={state.requestSnapshot}
             onCreateDoc={handleCreateDoc}
           />
         </div>
