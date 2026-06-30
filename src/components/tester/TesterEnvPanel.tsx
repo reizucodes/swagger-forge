@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import type { EnvVariable } from '@/domain/endpoint/tester/envVariables'
 
 interface Props {
@@ -12,14 +12,7 @@ const inputBase =
   'flex-1 bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] rounded px-2 py-1.5 text-sm text-[var(--gh-text-primary)] placeholder-[var(--gh-text-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--gh-accent)] focus:border-[var(--gh-accent)]/50'
 
 export function TesterEnvPanel({ variables, onAdd, onUpdate, onRemove }: Props) {
-  const [open, setOpen] = useState(() => variables.length > 0)
-
-  // Auto-open when variables are added for the first time
-  useEffect(() => {
-    if (variables.length > 0 && !open) {
-      // ponytail: only auto-opens on first variable add, not on every change
-    }
-  }, [variables.length, open])
+  const [open, setOpen] = useState(false)
 
   return (
     <div className="border-b border-[var(--gh-border)]">

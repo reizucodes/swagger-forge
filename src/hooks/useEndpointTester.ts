@@ -11,6 +11,13 @@ import { resolveVariables } from '@/domain/endpoint/tester/resolveVariables'
 export type TesterStatus = 'idle' | 'sending' | 'success' | 'error'
 export type TesterAuthType = 'none' | 'bearer' | 'apiKey'
 
+export interface RequestSnapshot {
+  method: string
+  url: string
+  headers: Record<string, string>
+  body: string | undefined
+}
+
 export interface TesterResponse {
   statusCode: number
   statusText: string
@@ -31,6 +38,7 @@ export interface TesterState {
   errorMessage: string | null
   response: TesterResponse | null
   resolveWarnings: string[]
+  requestSnapshot: RequestSnapshot | null
 }
 
 const initialState: TesterState = {
@@ -43,6 +51,7 @@ const initialState: TesterState = {
   errorMessage: null,
   response: null,
   resolveWarnings: [],
+  requestSnapshot: null,
 }
 
 export function useEndpointTester() {
@@ -130,6 +139,13 @@ export function useEndpointTester() {
       const resolveWarnings = [...new Set(allWarnings.filter(Boolean))]
       setState(prev => ({ ...prev, resolveWarnings }))
       const { url, init } = buildRequest(resolvedState)
+      const snapshot: RequestSnapshot = {
+        method: init.method as string,
+        url,
+        headers: (init.headers ?? {}) as Record<string, string>,
+        body: init.body as string | undefined,
+      }
+      setState(prev => ({ ...prev, requestSnapshot: snapshot }))
       const res = await fetch(url, init)
       const durationMs = Math.round(performance.now() - start)
       const bodyText = await res.text()
@@ -192,5 +208,6 @@ export function useEndpointTester() {
     addEnvVariable,
     updateEnvVariable,
     removeEnvVariable,
+    requestSnapshot: state.requestSnapshot,
   }
 }
