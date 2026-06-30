@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import type { TesterAuthType } from '@/hooks/useEndpointTester'
+import { useTokenInput } from '@/hooks/useTokenInput'
+import { TokenDropdown } from './TokenDropdown'
 
 interface Auth {
   type: TesterAuthType
@@ -10,10 +12,13 @@ interface Auth {
 interface Props {
   auth: Auth
   onChange: (patch: Partial<Auth>) => void
+  envNames: string[]
 }
 
-export function TesterAuthTab({ auth, onChange }: Props) {
+export function TesterAuthTab({ auth, onChange, envNames }: Props) {
   const [showValue, setShowValue] = useState(false)
+  const { inputRef, syncCaret, showDropdown, filteredNames, dropdownIndex, handleKeyDown, pickName } =
+    useTokenInput(auth.value, v => onChange({ value: v }), envNames)
 
   return (
     <div className="p-3 space-y-3">
@@ -37,12 +42,19 @@ export function TesterAuthTab({ auth, onChange }: Props) {
           </label>
           <div className="relative flex-1 min-w-0">
             <input
+              ref={inputRef}
               type={showValue ? 'text' : 'password'}
               value={auth.value}
-              onChange={e => onChange({ value: e.target.value })}
+              onChange={e => { onChange({ value: e.target.value }); syncCaret() }}
+              onKeyDown={handleKeyDown}
+              onSelect={syncCaret}
+              onFocus={syncCaret}
               placeholder={auth.type === 'bearer' ? 'your-token' : 'your-api-key'}
               className="w-full bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] rounded px-2 py-1.5 pr-8 text-sm text-[var(--gh-text-primary)] placeholder-[var(--gh-text-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--gh-accent)] focus:border-[var(--gh-accent)]/50"
             />
+            {showDropdown && (
+              <TokenDropdown names={filteredNames} selectedIndex={dropdownIndex} onPick={pickName} />
+            )}
             <button
               type="button"
               onClick={() => setShowValue(v => !v)}

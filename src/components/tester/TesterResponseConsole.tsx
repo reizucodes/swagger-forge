@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { tokenize, TOKEN_COLORS } from '@/components/preview/syntaxHighlight'
-import type { TesterStatus, TesterResponse } from '@/hooks/useEndpointTester'
+import type { TesterStatus, TesterResponse, RequestSnapshot } from '@/hooks/useEndpointTester'
 
 interface Props {
   status: TesterStatus
   errorMessage: string | null
   response: TesterResponse | null
+  requestSnapshot: RequestSnapshot | null
   onCreateDoc: () => void
 }
 
@@ -16,7 +17,31 @@ function statusBadgeClass(code: number): string {
   return 'text-red-400'
 }
 
-export function TesterResponseConsole({ status, errorMessage, response, onCreateDoc }: Props) {
+type ConsoleTab = 'response' | 'console'
+
+function ConsoleTabs({ active, onChange }: { active: ConsoleTab; onChange: (t: ConsoleTab) => void }) {
+  return (
+    <div className="flex border-b border-[var(--gh-border)]">
+      {(['response', 'console'] as ConsoleTab[]).map(tab => (
+        <button
+          key={tab}
+          onClick={() => onChange(tab)}
+          className={`px-4 py-2 text-sm transition border-b-2 -mb-px capitalize ${
+            active === tab
+              ? 'border-[var(--gh-accent)] text-[var(--gh-accent)]'
+              : 'border-transparent text-[var(--gh-text-secondary)] hover:text-[var(--gh-text-primary)]'
+          }`}
+        >
+          {tab}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+export function TesterResponseConsole({ status, errorMessage, response, requestSnapshot, onCreateDoc }: Props) {
+  const [activeTab, setActiveTab] = useState<ConsoleTab>('response')
+
   if (status === 'idle') {
     return (
       <div className="flex-1 flex items-center justify-center p-3 text-sm text-[var(--gh-text-secondary)]">
@@ -35,8 +60,16 @@ export function TesterResponseConsole({ status, errorMessage, response, onCreate
 
   if (status === 'error' && !response?.statusCode) {
     return (
-      <div className="p-3 space-y-3">
-        <p className="text-sm text-[var(--gh-danger)]">{errorMessage}</p>
+      <div className="flex flex-col flex-1 min-h-0">
+        <ConsoleTabs active={activeTab} onChange={setActiveTab} />
+        {activeTab === 'response' && (
+          <div className="p-3 space-y-3">
+            <p className="text-sm text-[var(--gh-danger)]">{errorMessage}</p>
+          </div>
+        )}
+        {activeTab === 'console' && requestSnapshot && (
+          <RequestConsole snapshot={requestSnapshot} />
+        )}
       </div>
     )
   }
@@ -56,14 +89,22 @@ export function TesterResponseConsole({ status, errorMessage, response, onCreate
     : null
 
   return (
-    <ResponseBody
-      response={response}
-      headerCount={headerCount}
-      prettyBody={prettyBody}
-      tokens={prettyTokens}
-      isHtml={isHtml}
-      onCreateDoc={onCreateDoc}
-    />
+    <div className="flex flex-col flex-1 min-h-0">
+      <ConsoleTabs active={activeTab} onChange={setActiveTab} />
+      {activeTab === 'response' && (
+        <ResponseBody
+          response={response}
+          headerCount={headerCount}
+          prettyBody={prettyBody}
+          tokens={prettyTokens}
+          isHtml={isHtml}
+          onCreateDoc={onCreateDoc}
+        />
+      )}
+      {activeTab === 'console' && requestSnapshot && (
+        <RequestConsole snapshot={requestSnapshot} />
+      )}
+    </div>
   )
 }
 
@@ -170,6 +211,55 @@ function ResponseBody({ response, headerCount, prettyBody, tokens, isHtml, onCre
       >
         Import to Builder
       </button>
+    </div>
+  )
+}
+
+const METHOD_COLORS: Record<string, string> = {
+  GET: 'text-blue-400',
+  POST: 'text-green-400',
+  PUT: 'text-yellow-400',
+  PATCH: 'text-orange-400',
+  DELETE: 'text-red-400',
+  HEAD: 'text-purple-400',
+  OPTIONS: 'text-cyan-400',
+}
+
+function RequestConsole({ snapshot }: { snapshot: RequestSnapshot }) {
+  const methodColor = METHOD_COLORS[snapshot.method] ?? 'text-[var(--gh-text-secondary)]'
+  const headerEntries = Object.entries(snapshot.headers)
+
+  return (
+    <div className="p-3 flex flex-col gap-3 overflow-auto">
+      <div className="flex items-baseline gap-2">
+        <span className={`font-mono text-sm font-semibold shrink-0 ${methodColor}`}>{snapshot.method}</span>
+        <span className="font-mono text-sm text-[var(--gh-text-primary)] break-all">{snapshot.url}</span>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <span className="text-xs text-[var(--gh-text-secondary)]">Request Headers</span>
+        {headerEntries.length === 0 ? (
+          <span className="text-xs text-[var(--gh-text-secondary)]">None</span>
+        ) : (
+          <div className="space-y-1 pl-2 border-l border-[var(--gh-border)]">
+            {headerEntries.map(([k, v]) => (
+              <div key={k} className="flex gap-2 text-xs font-mono">
+                <span className="text-[var(--gh-text-secondary)] shrink-0">{k}:</span>
+                <span className="text-[var(--gh-text-primary)] break-all">{v}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {snapshot.body !== undefined && snapshot.body !== '' && (
+        <div className="flex flex-col gap-1">
+          <span className="text-xs text-[var(--gh-text-secondary)]">Request Body</span>
+          <pre className="bg-[var(--gh-code-bg)] border border-[var(--gh-border)] rounded p-2 text-xs font-mono whitespace-pre-wrap break-words">
+            {snapshot.body}
+          </pre>
+        </div>
+      )}
     </div>
   )
 }
