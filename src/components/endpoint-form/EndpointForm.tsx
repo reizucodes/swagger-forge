@@ -26,7 +26,6 @@ export default function EndpointForm({ value, onChange, allowed, fromTester, onD
   const [showJsonModal, setShowJsonModal] = useState<boolean>(false);
   const [showImportModal, setShowImportModal] = useState<boolean>(false);
   const [selectedSample, setSelectedSample] = useState<string>('');
-  const [importError, setImportError] = useState<string>('');
 
   // Wrap onChange to clear stale sample selection on manual edits
   const handleChange = useCallback((updated: Endpoint) => {
@@ -312,12 +311,9 @@ export default function EndpointForm({ value, onChange, allowed, fromTester, onD
         onClose={() => setShowJsonModal(false)}
         json={jsonFieldToObject(value.requestBodyJsonFields || [])}
       />
-      {importError && (
-        <p className="text-[var(--gh-danger)] text-sm mt-1">{importError}</p>
-      )}
       <JsonImportModal
         open={showImportModal}
-        onClose={() => { setShowImportModal(false); setImportError(''); }}
+        onClose={() => setShowImportModal(false)}
         sample={JSON.stringify({
           name: "Doggie",
           status: "available",
@@ -327,14 +323,9 @@ export default function EndpointForm({ value, onChange, allowed, fromTester, onD
           }
         }, null, 2)}
         onImport={(jsonString) => {
-          try {
-            const parsed = JSON.parse(jsonString);
-            const fields = objectToJsonField(parsed);
-            handleChange({ ...value, requestBodyJsonFields: fields });
-            setImportError('');
-          } catch {
-            setImportError('Invalid JSON — please check the format and try again.');
-          }
+          const parsed = JSON.parse(jsonString);
+          const fields = objectToJsonField(parsed);
+          handleChange({ ...value, requestBodyJsonFields: fields });
         }}
       />
     </div>

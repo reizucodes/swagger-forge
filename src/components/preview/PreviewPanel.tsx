@@ -1,6 +1,4 @@
 import { useState } from 'react'
-
-const COPY_FEEDBACK_MS = 1500
 import type { Endpoint } from '@/domain/endpoint/models/Endpoint'
 import { generateAnnotation } from '@/core/annotation/generateAnnotation'
 import type { AnnotationTarget } from '@/core/annotation/contracts/AnnotationTarget'
@@ -9,6 +7,7 @@ import type { SpecVersionId } from '@/core/annotation/specs'
 import { getGeneratorDefinition } from '@/core/annotation/registry/generatorRegistry'
 import { ANNOTATION_TIPS } from '@/components/annotation/annotationTips'
 import { ANNOTATION_TARGETS } from '@/components/annotation/annotationTargets'
+import { useToast } from '@/components/toast/useToast'
 import { tokenize, TOKEN_COLORS } from './syntaxHighlight'
 
 interface Props {
@@ -16,6 +15,7 @@ interface Props {
 }
 
 export default function PreviewPanel({ endpoint }: Props) {
+  const toast = useToast()
   const [target, setTarget] = useState<AnnotationTarget>(() => {
     const saved = localStorage.getItem('sf:annotation-target')
     const valid: AnnotationTarget[] = ['php-swagger', 'php-attribute', 'js-jsdoc', 'openapi-json', 'py-fastapi']
@@ -28,7 +28,6 @@ export default function PreviewPanel({ endpoint }: Props) {
       : 'openapi-3.0.3'
   })
   const annotation = generateAnnotation(endpoint, target, getSpecVersion(specVersionId))
-  const [copied, setCopied] = useState(false)
   const [highlight, setHighlight] = useState(() =>
     localStorage.getItem('sf:highlight') !== 'false'
   )
@@ -37,9 +36,12 @@ export default function PreviewPanel({ endpoint }: Props) {
   )
 
   const copy = async () => {
-    await navigator.clipboard.writeText(annotation)
-    setCopied(true)
-    setTimeout(() => setCopied(false), COPY_FEEDBACK_MS)
+    try {
+      await navigator.clipboard.writeText(annotation)
+      toast.success('Annotation copied to clipboard.')
+    } catch {
+      toast.error('Could not copy the annotation.')
+    }
   }
 
   return (
@@ -48,7 +50,6 @@ export default function PreviewPanel({ endpoint }: Props) {
         <div className="flex items-center justify-between gap-2">
           <h3 className="font-semibold text-[var(--gh-text-primary)]">Generated Annotation</h3>
           <div className="flex items-center gap-2">
-            {copied && <span className="text-sm text-[var(--gh-accent)]">Copied!</span>}
             <div className="relative group">
               <button
                 onClick={() => setHighlight(h => {

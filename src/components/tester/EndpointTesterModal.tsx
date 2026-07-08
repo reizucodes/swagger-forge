@@ -1,5 +1,6 @@
-import { useState, useRef, useCallback } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Endpoint } from '@/domain/endpoint/models/Endpoint'
+import { useToast } from '@/components/toast/useToast'
 import { useEndpointTester } from '@/hooks/useEndpointTester'
 import { TesterRequestBar } from './TesterRequestBar'
 import { TesterAuthTab } from './TesterAuthTab'
@@ -18,6 +19,7 @@ interface Props {
 type Tab = 'auth' | 'headers' | 'body'
 
 export function EndpointTesterModal({ open, onClose, onApplyEndpoint }: Props) {
+  const toast = useToast()
   const [activeTab, setActiveTab] = useState<Tab>('auth')
   const [infoOpen, setInfoOpen] = useState(false)
   const {
@@ -43,6 +45,25 @@ export function EndpointTesterModal({ open, onClose, onApplyEndpoint }: Props) {
   const isDragging = useRef(false)
   const dragStartY = useRef(0)
   const dragStartHeight = useRef(0)
+  const lastErrorRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (state.requestSnapshot && state.resolveWarnings.length > 0) {
+      toast.warning(`Unresolved variables: ${state.resolveWarnings.join(', ')}`)
+    }
+  }, [state.requestSnapshot, state.resolveWarnings, toast])
+
+  useEffect(() => {
+    if (state.status === 'error' && state.errorMessage && state.errorMessage !== lastErrorRef.current) {
+      toast.error(state.errorMessage)
+      lastErrorRef.current = state.errorMessage
+      return
+    }
+
+    if (state.status !== 'error') {
+      lastErrorRef.current = null
+    }
+  }, [state.errorMessage, state.status, toast])
 
   const onDragStart = useCallback((e: React.MouseEvent) => {
     isDragging.current = true
@@ -151,10 +172,8 @@ export function EndpointTesterModal({ open, onClose, onApplyEndpoint }: Props) {
           onMethodChange={setMethod}
           onUrlChange={setUrl}
           onSend={send}
-          resolveWarnings={state.resolveWarnings}
           envNames={envVariables.map(v => v.name)}
           envMap={Object.fromEntries(envVariables.filter(v => v.name.trim()).map(v => [v.name, v.value]))}
-          envVariables={envVariables}
           onUpdateEnvValue={(name, value) => {
             const v = envVariables.find(ev => ev.name === name)
             if (v) updateEnvVariable(v.id, 'value', value)
