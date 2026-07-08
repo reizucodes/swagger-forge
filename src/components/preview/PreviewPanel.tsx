@@ -113,68 +113,72 @@ export default function PreviewPanel({ endpoint }: Props) {
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <label className="text-xs text-[var(--gh-text-secondary)]" htmlFor="annotation-format">Format:</label>
-          <select
-            id="annotation-format"
-            className="text-xs border border-[var(--gh-border)] rounded px-2 py-1 bg-[var(--gh-canvas-subtle)] text-[var(--gh-text-primary)] placeholder-[var(--gh-text-placeholder)] focus:outline-none"
-            value={target}
-            onChange={(e) => {
-              const val = e.target.value as AnnotationTarget
-              setTarget(val)
-              localStorage.setItem('sf:annotation-target', val)
-              const def = getGeneratorDefinition(val)
-              if (!def.supportedSpecs.includes(specVersionId)) {
-                const fallback = def.supportedSpecs[0]
-                setSpecVersionId(fallback)
-                localStorage.setItem('sf:spec-version', fallback)
-              }
-            }}
-          >
-            {(() => {
-              const groups: Record<string, typeof ANNOTATION_TARGETS[number][]> = {}
-              for (const t of ANNOTATION_TARGETS) {
-                const g = t.group ?? 'Other'
-                if (!groups[g]) groups[g] = []
-                groups[g].push(t)
-              }
-              return Object.entries(groups).map(([group, targets]) =>
-                targets.length === 1 && !targets[0].group ? (
-                  <option key={targets[0].value} value={targets[0].value} disabled={targets[0].isDisabled}>
-                    {targets[0].label}
-                  </option>
-                ) : (
-                  <optgroup key={group} label={group}>
-                    {targets.map(t => (
-                      <option key={t.value} value={t.value} disabled={t.isDisabled}>
-                        {t.label}
-                      </option>
-                    ))}
-                  </optgroup>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 sm:flex-initial sm:flex-nowrap">
+            <label className="text-xs text-[var(--gh-text-secondary)]" htmlFor="annotation-format">Format:</label>
+            <select
+              id="annotation-format"
+              className="min-w-0 flex-1 text-xs border border-[var(--gh-border)] rounded px-2 py-1 bg-[var(--gh-canvas-subtle)] text-[var(--gh-text-primary)] placeholder-[var(--gh-text-placeholder)] focus:outline-none sm:w-auto"
+              value={target}
+              onChange={(e) => {
+                const val = e.target.value as AnnotationTarget
+                setTarget(val)
+                localStorage.setItem('sf:annotation-target', val)
+                const def = getGeneratorDefinition(val)
+                if (!def.supportedSpecs.includes(specVersionId)) {
+                  const fallback = def.supportedSpecs[0]
+                  setSpecVersionId(fallback)
+                  localStorage.setItem('sf:spec-version', fallback)
+                }
+              }}
+            >
+              {(() => {
+                const groups: Record<string, typeof ANNOTATION_TARGETS[number][]> = {}
+                for (const t of ANNOTATION_TARGETS) {
+                  const g = t.group ?? 'Other'
+                  if (!groups[g]) groups[g] = []
+                  groups[g].push(t)
+                }
+                return Object.entries(groups).map(([group, targets]) =>
+                  targets.length === 1 && !targets[0].group ? (
+                    <option key={targets[0].value} value={targets[0].value} disabled={targets[0].isDisabled}>
+                      {targets[0].label}
+                    </option>
+                  ) : (
+                    <optgroup key={group} label={group}>
+                      {targets.map(t => (
+                        <option key={t.value} value={t.value} disabled={t.isDisabled}>
+                          {t.label}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )
                 )
-              )
-            })()}
-          </select>
-          <label className="text-xs text-[var(--gh-text-secondary)]" htmlFor="spec-version">Spec:</label>
-          <select
-            id="spec-version"
-            className="text-xs border border-[var(--gh-border)] rounded px-2 py-1 bg-[var(--gh-canvas-subtle)] text-[var(--gh-text-primary)] focus:outline-none"
-            value={specVersionId}
-            onChange={(e) => {
-              const val = e.target.value as SpecVersionId
-              setSpecVersionId(val)
-              localStorage.setItem('sf:spec-version', val)
-            }}
-          >
-            {SPEC_VERSIONS.map(sv => {
-              const supported = getGeneratorDefinition(target).supportedSpecs.includes(sv.id)
-              return (
-                <option key={sv.id} value={sv.id} disabled={!supported}>
-                  {sv.label}
-                </option>
-              )
-            })}
-          </select>
+              })()}
+            </select>
+          </div>
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 sm:flex-initial sm:flex-nowrap">
+            <label className="text-xs text-[var(--gh-text-secondary)]" htmlFor="spec-version">Spec:</label>
+            <select
+              id="spec-version"
+              className="min-w-0 flex-1 text-xs border border-[var(--gh-border)] rounded px-2 py-1 bg-[var(--gh-canvas-subtle)] text-[var(--gh-text-primary)] focus:outline-none sm:w-auto"
+              value={specVersionId}
+              onChange={(e) => {
+                const val = e.target.value as SpecVersionId
+                setSpecVersionId(val)
+                localStorage.setItem('sf:spec-version', val)
+              }}
+            >
+              {SPEC_VERSIONS.map(sv => {
+                const supported = getGeneratorDefinition(target).supportedSpecs.includes(sv.id)
+                return (
+                  <option key={sv.id} value={sv.id} disabled={!supported}>
+                    {sv.label}
+                  </option>
+                )
+              })}
+            </select>
+          </div>
         </div>
       </div>
 
