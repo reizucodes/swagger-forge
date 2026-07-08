@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { tokenize, TOKEN_COLORS } from '@/components/preview/syntaxHighlight'
+import { useToast } from '@/components/toast/useToast'
 import type { TesterStatus, TesterResponse, RequestSnapshot } from '@/hooks/useEndpointTester'
 
 interface Props {
@@ -116,17 +117,20 @@ function ResponseBody({ response, headerCount, prettyBody, tokens, isHtml, onCre
   isHtml: boolean
   onCreateDoc: () => void
 }) {
+  const toast = useToast()
   const [pretty, setPretty] = useState(false)
-  const [copied, setCopied] = useState(false)
   const [wrap, setWrap] = useState(true)
 
   const displayBody = pretty ? prettyBody : response.body
   const displayTokens = pretty ? tokens : (response.isJson && response.body ? tokenize(response.body, 'openapi-json') : null)
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(displayBody)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1500)
+    try {
+      await navigator.clipboard.writeText(displayBody)
+      toast.success('Response body copied to clipboard.')
+    } catch {
+      toast.error('Could not copy the response body.')
+    }
   }
 
   return (
@@ -175,7 +179,7 @@ function ResponseBody({ response, headerCount, prettyBody, tokens, isHtml, onCre
                 onClick={handleCopy}
                 className="text-xs text-[var(--gh-text-secondary)] underline hover:opacity-80"
               >
-                {copied ? 'Copied!' : 'Copy'}
+                Copy
               </button>
             )}
           </div>

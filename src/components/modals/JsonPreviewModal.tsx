@@ -1,23 +1,24 @@
-import { useState } from "react";
-
-const COPY_FEEDBACK_MS = 1500
+import { useToast } from '@/components/toast/useToast'
 
 interface Props {
-    open: boolean;
-    onClose: () => void;
-    json: unknown;
+    open: boolean
+    onClose: () => void
+    json: unknown
 }
 
 export function JsonPreviewModal({ open, onClose, json }: Props) {
-    const [copied, setCopied] = useState(false);
+    const toast = useToast()
 
-    if (!open) return null;
+    if (!open) return null
 
     const handleCopy = async () => {
-        await navigator.clipboard.writeText(JSON.stringify(json, null, 2));
-        setCopied(true);
-        setTimeout(() => setCopied(false), COPY_FEEDBACK_MS);
-    };
+        try {
+            await navigator.clipboard.writeText(JSON.stringify(json, null, 2))
+            toast.success('JSON copied to clipboard.')
+        } catch {
+            toast.error('Could not copy the JSON preview.')
+        }
+    }
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
@@ -26,8 +27,6 @@ export function JsonPreviewModal({ open, onClose, json }: Props) {
                 <div className="flex justify-between items-center mb-3 pb-3 border-b border-[var(--gh-border)]">
                     <h2 className="font-semibold text-lg text-[var(--gh-text-primary)]">JSON Preview</h2>
                     <div className="flex items-center gap-2">
-                      {/* Copied indicator */}
-                        {copied && <span className="text-sm text-[var(--gh-accent)]">Copied!</span>}
                       {/* Copy button */}
                         <div className="relative group">
                           <button
@@ -68,5 +67,5 @@ export function JsonPreviewModal({ open, onClose, json }: Props) {
                 </pre>
             </div>
         </div>
-    );
+    )
 }

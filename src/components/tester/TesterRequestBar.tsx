@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
 import type { HttpMethod } from '@/domain/endpoint/models/enums'
-import type { EnvVariable } from '@/domain/endpoint/tester/envVariables'
 import { useTokenInput } from '@/hooks/useTokenInput'
 import { TokenDropdown } from './TokenDropdown'
 
@@ -55,10 +54,8 @@ interface Props {
   onMethodChange: (m: HttpMethod) => void
   onUrlChange: (url: string) => void
   onSend: () => void
-  resolveWarnings?: string[]
   envNames?: string[]
   envMap?: Record<string, string>
-  envVariables?: EnvVariable[]
   onUpdateEnvValue?: (name: string, value: string) => void
 }
 
@@ -99,7 +96,7 @@ type PopoverState = {
   isDefined: boolean
 }
 
-export function TesterRequestBar({ method, url, isSending, onMethodChange, onUrlChange, onSend, resolveWarnings, envNames = [], envMap, onUpdateEnvValue }: Props) {
+export function TesterRequestBar({ method, url, isSending, onMethodChange, onUrlChange, onSend, envNames = [], envMap, onUpdateEnvValue }: Props) {
   const { inputRef, syncCaret, showDropdown, filteredNames, dropdownIndex, handleKeyDown, pickName } =
     useTokenInput(url, onUrlChange, envNames)
   const [popover, setPopover] = useState<PopoverState | null>(null)
@@ -217,11 +214,6 @@ export function TesterRequestBar({ method, url, isSending, onMethodChange, onUrl
         {isSending ? 'Sending...' : 'Send'}
       </button>
     </div>
-    {resolveWarnings && resolveWarnings.length > 0 && (
-      <p className="px-3 pb-1.5 text-xs text-yellow-400">
-        Unresolved variables: {resolveWarnings.join(', ')}
-      </p>
-    )}
     </div>
   )
 }

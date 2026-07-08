@@ -1,58 +1,54 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from 'react'
+import { useToast } from '@/components/toast/useToast'
 
 interface Props {
-  open: boolean;
-  onClose: () => void;
-  onImport: (jsonString: string) => void;
-  sample?: string;
+  open: boolean
+  onClose: () => void
+  onImport: (jsonString: string) => void
+  sample?: string
 }
 
 export function JsonImportModal({ open, onClose, onImport, sample }: Props) {
-    const [input, setInput] = useState("");
-    const [error, setError] = useState<string | null>(null);
-    const [valid, setValid] = useState(false);
+    const [input, setInput] = useState('')
+    const toast = useToast()
 
     useEffect(() => {
         if (!open) {
-            setInput("");
-            setError(null);
-            setValid(false);
+            setInput('')
         }
-    }, [open]);
+    }, [open])
 
-    if (!open) return null;
+    if (!open) return null
 
     const handleValidate = () => {
         try {
-            JSON.parse(input);
-            setError(null);
-            setValid(true);
+            JSON.parse(input)
+            toast.success('JSON is valid.')
         } catch {
-            setError("Invalid JSON format");
-            setValid(false);
+            toast.error('Invalid JSON format.')
         }
-    };
+    }
 
     const handlePrettify = () => {
         try {
-            const parsed = JSON.parse(input);
-            setInput(JSON.stringify(parsed, null, 2));
-            setError(null);
+            const parsed = JSON.parse(input)
+            setInput(JSON.stringify(parsed, null, 2))
+            toast.success('JSON prettified.')
         } catch {
-            setError("Invalid JSON — cannot prettify");
+            toast.error('Invalid JSON — cannot prettify.')
         }
-    };
+    }
 
     const handleImport = () => {
         try {
-            JSON.parse(input);
-            setError(null);
-            onImport(input);
-            onClose();
+            JSON.parse(input)
+            onImport(input)
+            toast.success('JSON imported into the request body.')
+            onClose()
         } catch {
-            setError("Fix JSON errors first");
+            toast.error('Fix JSON errors first.')
         }
-    };
+    }
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
@@ -108,20 +104,16 @@ export function JsonImportModal({ open, onClose, onImport, sample }: Props) {
                 </button>
             </div>
 
-            {/* Feedback */}
-            {error && <div className="text-[var(--gh-danger)] text-xs mb-2 ml-0.5">{error}</div>}
-            {valid && !error && <div className="text-green-400 text-xs mb-2 ml-0.5">Valid JSON ✓</div>}
-
             {/* Textarea */}
             <textarea
                 className="w-full min-h-[8rem] h-48 max-h-[30vh] bg-[var(--gh-code-bg)] border border-[var(--gh-border)] rounded p-2 text-sm font-mono text-[var(--gh-code-text)] focus:outline-none focus:ring-1 focus:ring-[var(--gh-border)] focus:border-[var(--gh-accent)]/50 resize-y"
                 value={input}
-                onChange={(e) => { setInput(e.target.value); setValid(false); }}
+                onChange={(e) => setInput(e.target.value)}
 placeholder='{
     "example": true
 }'
             />
                 </div>
             </div>
-    );
+    )
 }
