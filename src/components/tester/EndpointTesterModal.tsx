@@ -9,6 +9,7 @@ import { TesterBodyTab } from './TesterBodyTab'
 import { TesterResponseConsole } from './TesterResponseConsole'
 import { TesterInfoModal } from './TesterInfoModal'
 import { TesterEnvPanel } from './TesterEnvPanel'
+import { Tooltip } from '@/components/Tooltip'
 
 interface Props {
   open: boolean
@@ -114,7 +115,7 @@ export function EndpointTesterModal({ open, onClose, onApplyEndpoint }: Props) {
       >
         <div className="flex justify-between items-center px-3 sm:px-4 py-3 border-b border-[var(--gh-border)]">
           <h2 className="font-semibold text-base sm:text-lg text-[var(--gh-text-primary)] flex items-center gap-2">
-            Test Endpoint
+            API Endpoint Runner
             <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[var(--gh-accent)]/15 text-[var(--gh-accent)] leading-none">Beta</span>
           </h2>
           <div className="flex items-center gap-1.5">
@@ -124,7 +125,7 @@ export function EndpointTesterModal({ open, onClose, onApplyEndpoint }: Props) {
             >
               Reset
             </button>
-            <div className="relative group">
+            <Tooltip label="About">
               <button
                 onClick={() => setInfoOpen(true)}
                 aria-label="About this feature"
@@ -136,11 +137,8 @@ export function EndpointTesterModal({ open, onClose, onApplyEndpoint }: Props) {
                   <line x1="12" y1="17" x2="12.01" y2="17"/>
                 </svg>
               </button>
-              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-1.5 py-0.5 rounded text-xs whitespace-nowrap bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] text-[var(--gh-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity delay-100 z-50">
-                About
-              </span>
-            </div>
-            <div className="relative group">
+            </Tooltip>
+            <Tooltip label="Close">
               <button
                 onClick={onClose}
                 aria-label="Close"
@@ -151,10 +149,7 @@ export function EndpointTesterModal({ open, onClose, onApplyEndpoint }: Props) {
                   <line x1="6" y1="6" x2="18" y2="18"/>
                 </svg>
               </button>
-              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-1.5 py-0.5 rounded text-xs whitespace-nowrap bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] text-[var(--gh-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity delay-100 z-50">
-                Close
-              </span>
-            </div>
+            </Tooltip>
           </div>
         </div>
 

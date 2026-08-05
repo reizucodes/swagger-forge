@@ -2,6 +2,7 @@ import { useState } from "react"
 import type { JsonField } from "@/domain/endpoint/models/JsonField"
 import type { RequestBodyContentType, SchemaType } from "@/domain/endpoint/models/enums"
 import { applyJsonFieldPatch, getJsonFieldEditorRules } from "@/domain/endpoint/rules/jsonFieldEditing"
+import { Tooltip } from "@/components/Tooltip"
 
 // ponytail: fixed 3-stop palette; cycles at depth 3+ to avoid unbounded nesting styles
 const DEPTH_COLORS = [
@@ -72,12 +73,12 @@ export function JsonFieldEditor({ field, onChange, onRemove, contentType, depth 
                 />
                 {/* wrap the 3 buttons: flex row on mobile, sm:contents makes them grid cells on sm+ */}
                 <div className="flex gap-2 justify-end items-center sm:contents">
-                    <div className="relative group">
+                    <Tooltip label={field.required ? 'Required — click to make optional' : 'Optional — click to make required'}>
                         <button
                             type="button"
                             aria-label={field.required ? 'Mark as optional' : 'Mark as required'}
                             onClick={() => onChange(applyJsonFieldPatch(field, { required: !field.required }, contentType))}
-                            className={`transition hover:opacity-80 ${field.required ? 'text-[var(--gh-accent)]' : 'text-[var(--gh-text-secondary)] opacity-40'}`}
+                            className={`flex h-[18px] w-[18px] items-center justify-center transition hover:opacity-80 ${field.required ? 'text-[var(--gh-accent)]' : 'text-[var(--gh-text-secondary)] opacity-40'}`}
                         >
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 strokeWidth={field.required ? 2.5 : 1.5}
@@ -87,29 +88,24 @@ export function JsonFieldEditor({ field, onChange, onRemove, contentType, depth 
                                 <line x1="12" y1="16" x2="12.01" y2="16"/>
                             </svg>
                         </button>
-                        <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-1.5 py-0.5 rounded text-xs whitespace-nowrap bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] text-[var(--gh-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity delay-100 z-50">
-                            {field.required ? 'Required — click to make optional' : 'Optional — click to make required'}
-                        </span>
-                    </div>
-                    <div className="relative group">
+                    </Tooltip>
+                    <Tooltip label={showDescription ? 'Hide description' : 'Add description'}>
                         <button
                             type="button"
                             aria-label={showDescription ? 'Hide description' : 'Add description'}
                             onClick={() => setShowDescription(v => !v)}
-                            className={`text-[var(--gh-text-secondary)] hover:opacity-80 transition ${showDescription ? 'opacity-100' : 'opacity-40'}`}
+                            className={`flex h-[18px] w-[18px] items-center justify-center text-[var(--gh-text-secondary)] hover:opacity-80 transition ${showDescription ? 'opacity-100' : 'opacity-40'}`}
                         >
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                                 <circle cx="12" cy="12" r="10"/>
                                 <text x="12" y="16.5" textAnchor="middle" fontStyle="italic" fontFamily="Georgia, serif" fontSize="11" fontWeight="bold" fill="currentColor" stroke="none">i</text>
                             </svg>
                         </button>
-                        <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-1.5 py-0.5 rounded text-xs whitespace-nowrap bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] text-[var(--gh-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity delay-100 z-50">
-                            {showDescription ? 'Hide description' : 'Add description'}
-                        </span>
-                    </div>
+                    </Tooltip>
                     <button
+                        type="button"
                         aria-label="Remove field"
-                        className="text-[var(--gh-danger)] hover:opacity-80"
+                        className="flex h-[18px] w-[18px] items-center justify-center text-[var(--gh-danger)] hover:opacity-80"
                         onClick={onRemove}
                     >
                         <svg height="16" width="16" fill="currentColor" viewBox="0 0 24 24">

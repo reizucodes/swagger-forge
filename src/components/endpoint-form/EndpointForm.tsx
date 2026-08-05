@@ -10,6 +10,7 @@ import { EMPTY_ENDPOINT } from '@/constants/endpoint'
 import { SAMPLE_ENDPOINTS } from '@/constants/endpoint'
 import { JsonPreviewModal } from '@/components/modals/JsonPreviewModal'
 import { JsonImportModal } from '@/components/modals/JsonImportModal'
+import { Tooltip } from '@/components/Tooltip'
 import { jsonFieldToObject } from '@/domain/endpoint/transformers/jsonFieldToObject'
 import { objectToJsonField } from '@/domain/endpoint/transformers/objectToJsonField'
 import { setRequestBodyContentType } from '@/application/endpoint/requestBody'
@@ -230,30 +231,24 @@ export default function EndpointForm({ value, onChange, allowed, fromTester, onD
                 <option value="x-www-form-urlencoded" disabled>(coming soon)</option>
               </select>
               {value.requestBodyContentType === "application/json" && (
-                <div className="relative group">
+                <Tooltip label="See the request body as a raw JSON object">
                   <button
                     className="text-sm underline text-[var(--gh-accent)] hover:opacity-80"
                     onClick={() => setShowJsonModal(true)}
                   >
                     Preview
                   </button>
-                  <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 rounded text-xs bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] text-[var(--gh-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity delay-100 z-50 text-center max-w-[160px] max-w-[80vw]" style={{whiteSpace: 'normal', width: '160px'}}>
-                    See the request body as a raw JSON object
-                  </span>
-                </div>
+                </Tooltip>
               )}
               {value.requestBodyContentType === "application/json" && (
-                <div className="relative group">
+                <Tooltip label="Paste a JSON object to auto-fill the request body fields">
                   <button
                     className="text-sm underline text-[var(--gh-accent)] hover:opacity-80"
                     onClick={() => setShowImportModal(true)}
                   >
                     Import
                   </button>
-                  <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 rounded text-xs bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] text-[var(--gh-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity delay-100 z-50 text-center max-w-[180px] max-w-[80vw]" style={{whiteSpace: 'normal', width: '180px'}}>
-                    Paste a JSON object to auto-fill the request body fields
-                  </span>
-                </div>
+                </Tooltip>
               )}
             </div>
             <button className="text-sm text-[var(--gh-accent)] underline hover:opacity-80" onClick={addRequestBodyField}>

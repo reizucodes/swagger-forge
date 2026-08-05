@@ -1,4 +1,5 @@
 import { useToast } from '@/components/toast/useToast'
+import { Tooltip } from '@/components/Tooltip'
 
 interface Props {
     open: boolean
@@ -28,7 +29,7 @@ export function JsonPreviewModal({ open, onClose, json }: Props) {
                     <h2 className="font-semibold text-lg text-[var(--gh-text-primary)]">JSON Preview</h2>
                     <div className="flex items-center gap-2">
                       {/* Copy button */}
-                        <div className="relative group">
+                        <Tooltip label="Copy JSON">
                           <button
                               className="p-1.5 border border-[var(--gh-border)] rounded text-[var(--gh-accent)] hover:opacity-80 hover:border-[var(--gh-accent)] transition"
                               onClick={handleCopy}
@@ -39,12 +40,9 @@ export function JsonPreviewModal({ open, onClose, json }: Props) {
                               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
                             </svg>
                           </button>
-                          <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-1.5 py-0.5 rounded text-xs whitespace-nowrap bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] text-[var(--gh-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity delay-100 z-50">
-                            Copy JSON
-                          </span>
-                        </div>
+                        </Tooltip>
                         {/* Close button */}
-                        <div className="relative group">
+                        <Tooltip label="Close">
                           <button
                               className="p-1.5 border border-[var(--gh-border)] rounded text-[var(--gh-text-secondary)] hover:opacity-80 hover:border-[var(--gh-accent)] hover:text-[var(--gh-accent)] transition"
                               onClick={onClose}
@@ -55,10 +53,7 @@ export function JsonPreviewModal({ open, onClose, json }: Props) {
                               <line x1="6" y1="6" x2="18" y2="18"/>
                             </svg>
                           </button>
-                          <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-1.5 py-0.5 rounded text-xs whitespace-nowrap bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] text-[var(--gh-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity delay-100 z-50">
-                            Close
-                          </span>
-                        </div>
+                        </Tooltip>
                     </div>
                 </div>
                 {/* JSON Content */}
