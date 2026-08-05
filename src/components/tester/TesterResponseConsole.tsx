@@ -33,7 +33,7 @@ function ConsoleTabs({ active, onChange }: { active: ConsoleTab; onChange: (t: C
               : 'border-transparent text-[var(--gh-text-secondary)] hover:text-[var(--gh-text-primary)]'
           }`}
         >
-          {tab}
+          {tab === 'response' ? 'Response' : 'Console'}
         </button>
       ))}
     </div>
@@ -46,7 +46,7 @@ export function TesterResponseConsole({ status, errorMessage, response, requestS
   if (status === 'idle') {
     return (
       <div className="flex-1 flex items-center justify-center p-3 text-sm text-[var(--gh-text-secondary)]">
-        Send a request to see the response.
+        Run the endpoint to see the response.
       </div>
     )
   }
@@ -54,7 +54,7 @@ export function TesterResponseConsole({ status, errorMessage, response, requestS
   if (status === 'sending') {
     return (
       <div className="p-3 text-sm text-[var(--gh-text-secondary)]">
-        Sending...
+        Running...
       </div>
     )
   }
@@ -120,6 +120,7 @@ function ResponseBody({ response, headerCount, prettyBody, tokens, isHtml, onCre
   const toast = useToast()
   const [pretty, setPretty] = useState(false)
   const [wrap, setWrap] = useState(true)
+  const [importConfirmationOpen, setImportConfirmationOpen] = useState(false)
 
   const displayBody = pretty ? prettyBody : response.body
   const displayTokens = pretty ? tokens : (response.isJson && response.body ? tokenize(response.body, 'openapi-json') : null)
@@ -206,15 +207,71 @@ function ResponseBody({ response, headerCount, prettyBody, tokens, isHtml, onCre
       </div>
 
       <button
-        onClick={() => {
-          if (window.confirm('This will overwrite your current builder form with data from this response. Continue?')) {
-            onCreateDoc()
-          }
-        }}
+        type="button"
+        onClick={() => setImportConfirmationOpen(true)}
         className="w-full py-2 rounded bg-[var(--gh-accent)] text-white text-sm font-medium hover:opacity-90 transition shrink-0"
       >
         Import to Builder
       </button>
+
+      {importConfirmationOpen && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setImportConfirmationOpen(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="import-builder-confirmation-title"
+            className="w-full max-w-md rounded-lg border border-[var(--gh-border)] bg-[var(--gh-canvas)] p-4 shadow-xl"
+            onClick={event => event.stopPropagation()}
+          >
+            <div className="mb-4 flex items-start justify-between gap-4">
+              <div>
+                <h2
+                  id="import-builder-confirmation-title"
+                  className="text-lg font-semibold text-[var(--gh-text-primary)]"
+                >
+                  Import to Builder?
+                </h2>
+                <p className="mt-2 text-sm text-[var(--gh-text-secondary)]">
+                  This will overwrite your current builder form with data from this response.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setImportConfirmationOpen(false)}
+                aria-label="Close import confirmation"
+                className="rounded p-1.5 text-[var(--gh-text-secondary)] transition hover:text-[var(--gh-text-primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gh-accent)]"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setImportConfirmationOpen(false)}
+                className="rounded border border-[var(--gh-border)] px-3 py-2 text-sm text-[var(--gh-text-secondary)] transition hover:text-[var(--gh-text-primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gh-accent)]"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setImportConfirmationOpen(false)
+                  onCreateDoc()
+                }}
+                className="rounded bg-[var(--gh-accent)] px-3 py-2 text-sm font-medium text-white transition hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gh-accent)]"
+              >
+                Import to Builder
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

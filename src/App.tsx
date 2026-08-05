@@ -42,7 +42,7 @@ export default function App() {
             onClick={() => setTesterOpen(true)}
             className="px-2 py-1 sm:px-3 sm:py-1.5 rounded border border-[var(--gh-accent)] text-[var(--gh-accent)] text-xs sm:text-sm hover:bg-[var(--gh-accent)]/10 transition flex items-center gap-1.5"
           >
-            Test Endpoint
+            API Endpoint Runner
             <span className="hidden sm:inline text-[10px] font-semibold px-1 py-0.5 rounded bg-[var(--gh-accent)]/15 text-[var(--gh-accent)] leading-none">Beta</span>
           </button>
           <button

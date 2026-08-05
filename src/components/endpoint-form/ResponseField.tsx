@@ -4,6 +4,7 @@ import type { JsonField } from "@/domain/endpoint/models/JsonField"
 import { JsonFieldEditor } from "@/components/endpoint-form/JsonFieldEditor"
 import { JsonImportModal } from "@/components/modals/JsonImportModal"
 import { objectToJsonField } from "@/domain/endpoint/transformers/objectToJsonField"
+import { Tooltip } from "@/components/Tooltip"
 
 interface Props {
     response: ResponseDef
@@ -97,7 +98,7 @@ export function ResponseField({ response, onChange, onRemove }: Props) {
                     value={response.description || ''}
                     onChange={e => onChange({ ...response, description: e.target.value })}
                 />
-                <div className="relative group">
+                <Tooltip label={open ? 'Collapse response body' : 'Add response body schema'}>
                     <button
                         type="button"
                         aria-label={open ? 'Collapse response body' : 'Expand response body'}
@@ -108,10 +109,7 @@ export function ResponseField({ response, onChange, onRemove }: Props) {
                             {open ? <polyline points="18 15 12 9 6 15"/> : <polyline points="6 9 12 15 18 9"/>}
                         </svg>
                     </button>
-                    <span className="pointer-events-none absolute bottom-full right-0 mb-1.5 px-1.5 py-0.5 rounded text-xs whitespace-nowrap bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] text-[var(--gh-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity delay-100 z-50">
-                        {open ? 'Collapse response body' : 'Add response body schema'}
-                    </span>
-                </div>
+                </Tooltip>
                 <button aria-label="Remove response" className="text-[var(--gh-danger)] hover:opacity-80" onClick={onRemove}>
                     <svg height="20" width="20" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path d="M5.755,20.283,4,8H20L18.245,20.283A2,2,0,0,1,16.265,22H7.735A2,2,0,0,1,5.755,20.283ZM21,4H16V3a1,1,0,0,0-1-1H9A1,1,0,0,0,8,3V4H3A1,1,0,0,0,3,6H21a1,1,0,0,0,0-2Z"></path>
@@ -150,7 +148,7 @@ export function ResponseField({ response, onChange, onRemove }: Props) {
                         >
                             Add field
                         </button>
-                        <div className="relative group">
+                        <Tooltip label="Import JSON as response schema">
                             <button
                                 type="button"
                                 className="text-sm text-[var(--gh-text-secondary)] underline hover:opacity-80"
@@ -158,10 +156,7 @@ export function ResponseField({ response, onChange, onRemove }: Props) {
                             >
                                 Import
                             </button>
-                            <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-1.5 py-0.5 rounded text-xs whitespace-nowrap bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] text-[var(--gh-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity delay-100 z-50">
-                                Import JSON as response schema
-                            </span>
-                        </div>
+                        </Tooltip>
                     </div>
                 </div>
             )}

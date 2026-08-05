@@ -211,7 +211,7 @@ export function TesterRequestBar({ method, url, isSending, onMethodChange, onUrl
         disabled={isSending || !url.trim()}
         className="px-4 py-1.5 rounded bg-[var(--gh-accent)] text-white text-sm font-medium hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {isSending ? 'Sending...' : 'Send'}
+        {isSending ? 'Running...' : 'Run Endpoint'}
       </button>
     </div>
     </div>

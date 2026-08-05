@@ -1,3 +1,5 @@
+import { Tooltip } from '@/components/Tooltip'
+
 interface Props {
   open: boolean
   onClose: () => void
@@ -11,10 +13,10 @@ export function TesterInfoModal({ open, onClose }: Props) {
       <div className="bg-[var(--gh-canvas)] border border-[var(--gh-border)] rounded-lg p-4 w-full max-w-lg lg:max-w-2xl" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-3 pb-3 border-b border-[var(--gh-border)]">
           <h2 className="font-semibold text-lg text-[var(--gh-text-primary)] flex items-center gap-2">
-            Test Endpoint
+            API Endpoint Runner
             <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[var(--gh-accent)]/15 text-[var(--gh-accent)] leading-none">Beta</span>
           </h2>
-          <div className="relative group">
+          <Tooltip label="Close" placement="bottom">
             <button
               className="p-1.5 border border-[var(--gh-border)] rounded text-[var(--gh-text-secondary)] hover:opacity-80 hover:border-[var(--gh-accent)] hover:text-[var(--gh-accent)] transition"
               onClick={onClose}
@@ -25,15 +27,12 @@ export function TesterInfoModal({ open, onClose }: Props) {
                 <line x1="6" y1="6" x2="18" y2="18"/>
               </svg>
             </button>
-            <span className="pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mt-1.5 px-1.5 py-0.5 rounded text-xs whitespace-nowrap bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] text-[var(--gh-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity delay-100 z-50">
-              Close
-            </span>
-          </div>
+          </Tooltip>
         </div>
 
         <div className="flex flex-col gap-5 text-sm">
           <p className="text-[var(--gh-text-secondary)] leading-relaxed">
-            Send real HTTP requests to your API directly from the browser — no external tool needed.
+            Run API endpoints directly from the browser and inspect their responses — no external tool needed.
           </p>
 
           <section>
@@ -44,7 +43,7 @@ export function TesterInfoModal({ open, onClose }: Props) {
                 ['Configure auth', 'Add a Bearer token or API key under the Auth tab if your endpoint requires it.'],
                 ['Add headers', 'Inject any custom request headers under the Headers tab.'],
                 ['Set a body', 'For POST / PUT / PATCH, provide a raw JSON body under the Body tab.'],
-                ['Send', 'Hit Send and review the status code, response headers, and body.'],
+                ['Run Endpoint', 'Click Run Endpoint and review the status code, response headers, and body.'],
                 ['Read the response', 'Prettify or toggle wrap for large payloads. Copy the body to clipboard if needed.'],
                 ['Import to Builder', 'Click "Import to Builder" to import the method, path, request body, and response into your spec form.'],
               ] as [string, string][]).map(([title, detail], i) => (
