@@ -9,6 +9,7 @@ import { ANNOTATION_TIPS } from '@/components/annotation/annotationTips'
 import { ANNOTATION_TARGETS } from '@/components/annotation/annotationTargets'
 import { useToast } from '@/components/toast/useToast'
 import { tokenize, TOKEN_COLORS } from './syntaxHighlight'
+import { Tooltip } from '@/components/Tooltip'
 
 interface Props {
   endpoint: Endpoint
@@ -50,7 +51,7 @@ export default function PreviewPanel({ endpoint }: Props) {
         <div className="flex items-center justify-between gap-2">
           <h3 className="font-semibold text-[var(--gh-text-primary)]">Generated Annotation</h3>
           <div className="flex items-center gap-2">
-            <div className="relative group">
+            <Tooltip label={highlight ? 'Highlighting on' : 'Highlighting off'} placement="bottom">
               <button
                 onClick={() => setHighlight(h => {
                   const next = !h
@@ -69,11 +70,8 @@ export default function PreviewPanel({ endpoint }: Props) {
                   <polyline points="8 6 2 12 8 18"/>
                 </svg>
               </button>
-              <span className="pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mt-1.5 px-1.5 py-0.5 rounded text-xs whitespace-nowrap bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] text-[var(--gh-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity delay-100 z-50">
-                {highlight ? 'Highlighting on' : 'Highlighting off'}
-              </span>
-            </div>
-            <div className="relative group">
+            </Tooltip>
+            <Tooltip label={wrap ? 'Word wrap on' : 'Word wrap off'} placement="bottom">
               <button
                 onClick={() => setWrap(w => {
                   const next = !w
@@ -93,11 +91,8 @@ export default function PreviewPanel({ endpoint }: Props) {
                   <polyline points="11 16 8 20 11 24"/>
                 </svg>
               </button>
-              <span className="pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mt-1.5 px-1.5 py-0.5 rounded text-xs whitespace-nowrap bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] text-[var(--gh-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity delay-100 z-50">
-                {wrap ? 'Word wrap on' : 'Word wrap off'}
-              </span>
-            </div>
-            <div className="relative group">
+            </Tooltip>
+            <Tooltip label="Copy" placement="bottom">
               <button
                 className="p-1.5 border border-[var(--gh-border)] rounded text-[var(--gh-accent)] hover:opacity-80 hover:border-[var(--gh-accent)] transition"
                 onClick={copy}
@@ -108,10 +103,7 @@ export default function PreviewPanel({ endpoint }: Props) {
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
                 </svg>
               </button>
-              <span className="pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mt-1.5 px-1.5 py-0.5 rounded text-xs whitespace-nowrap bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] text-[var(--gh-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity delay-100 z-50">
-                Copy
-              </span>
-            </div>
+            </Tooltip>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">

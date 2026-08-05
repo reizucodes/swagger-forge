@@ -1,5 +1,6 @@
 import type { Parameter } from "@/domain/endpoint/models/Parameter"
 import type { ParamLocation, SchemaType } from "@/domain/endpoint/models/enums";
+import { Tooltip } from "@/components/Tooltip"
 
 interface Props {
     parameter: Parameter
@@ -45,7 +46,7 @@ export function ParameterField({ parameter, allowed, onChange, onRemove }: Props
                 </select>
 
                 {/* Required Toggle */}
-                <div className="relative group">
+                <Tooltip label={parameter.required ? 'Required' : 'Optional'}>
                     <button
                         type="button"
                         aria-pressed={parameter.required}
@@ -58,10 +59,7 @@ export function ParameterField({ parameter, allowed, onChange, onRemove }: Props
                     >
                         {parameter.required ? 'Required' : 'Optional'}
                     </button>
-                    <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-1.5 py-0.5 rounded text-xs whitespace-nowrap bg-[var(--gh-canvas-subtle)] border border-[var(--gh-border)] text-[var(--gh-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity delay-100 z-50">
-                        {parameter.required ? 'Required' : 'Optional'}
-                    </span>
-                </div>
+                </Tooltip>
 
                 {/* Remove Button */}
                 <button
