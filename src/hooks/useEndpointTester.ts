@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { Endpoint } from '@/domain/endpoint/models/Endpoint'
 import type { HttpMethod } from '@/domain/endpoint/models/enums'
 import { buildRequest } from '@/domain/endpoint/tester/buildRequest'
@@ -18,6 +18,12 @@ export interface RequestSnapshot {
   body: string | undefined
 }
 
+export interface RequestLogEntry {
+  id: number
+  timestamp: number
+  snapshot: RequestSnapshot
+}
+
 export interface TesterResponse {
   statusCode: number
   statusText: string
@@ -26,6 +32,14 @@ export interface TesterResponse {
   bodyParsed: unknown | null
   isJson: boolean
   durationMs: number
+}
+
+export interface ResponseLogEntry {
+  id: number
+  timestamp: number
+  response: TesterResponse
+  errorMessage: string | null
+  requestSnapshot: RequestSnapshot
 }
 
 export interface TesterState {
@@ -39,24 +53,36 @@ export interface TesterState {
   response: TesterResponse | null
   resolveWarnings: string[]
   requestSnapshot: RequestSnapshot | null
+  requestHistory: RequestLogEntry[]
+  responseHistory: ResponseLogEntry[]
 }
 
-const initialState: TesterState = {
-  method: 'get',
-  url: '',
-  auth: { type: 'none', value: '', headerName: 'X-API-Key' },
-  headers: [],
-  body: '',
-  status: 'idle',
-  errorMessage: null,
-  response: null,
-  resolveWarnings: [],
-  requestSnapshot: null,
+function createEmptyHeader() {
+  return { id: globalThis.crypto.randomUUID(), key: '', value: '' }
+}
+
+function createInitialState(): TesterState {
+  return {
+    method: 'get',
+    url: '',
+    auth: { type: 'none', value: '', headerName: 'X-API-Key' },
+    headers: [createEmptyHeader()],
+    body: '',
+    status: 'idle',
+    errorMessage: null,
+    response: null,
+    resolveWarnings: [],
+    requestSnapshot: null,
+    requestHistory: [],
+    responseHistory: [],
+  }
 }
 
 export function useEndpointTester() {
-  const [state, setState] = useState<TesterState>(initialState)
+  const [state, setState] = useState<TesterState>(createInitialState)
   const [envVariables, setEnvVariables] = useState<EnvVariable[]>(() => loadEnvVariables())
+  const requestIdRef = useRef(0)
+  const runGenerationRef = useRef(0)
 
   useEffect(() => { saveEnvVariables(envVariables) }, [envVariables])
 
@@ -85,13 +111,32 @@ export function useEndpointTester() {
     }))
 
   const updateHeader = (id: string, field: 'key' | 'value', value: string) =>
-    setState(prev => ({
-      ...prev,
-      headers: prev.headers.map(h => (h.id === id ? { ...h, [field]: value } : h)),
-    }))
+    setState(prev => {
+      const headers = prev.headers.map(h => (h.id === id ? { ...h, [field]: value } : h))
+      const editedIndex = headers.findIndex(h => h.id === id)
+      const editedHeader = editedIndex >= 0 ? headers[editedIndex] : undefined
+      const isLastRow = editedIndex === headers.length - 1
+      if (isLastRow && editedHeader && (editedHeader.key.trim() !== '' || editedHeader.value.trim() !== '')) {
+        return { ...prev, headers: [...headers, createEmptyHeader()] }
+      }
+      return { ...prev, headers }
+    })
 
   const removeHeader = (id: string) =>
-    setState(prev => ({ ...prev, headers: prev.headers.filter(h => h.id !== id) }))
+    setState(prev => {
+      const headers = prev.headers.filter(h => h.id !== id)
+      return { ...prev, headers: headers.length > 0 ? headers : [createEmptyHeader()] }
+    })
+
+  const cleanupHeaders = () =>
+    setState(prev => {
+      const populatedHeaders = prev.headers.filter(h => h.key.trim() !== '' || h.value.trim() !== '')
+      const lastHeader = prev.headers[prev.headers.length - 1]
+      const trailingBlank = lastHeader && lastHeader.key.trim() === '' && lastHeader.value.trim() === ''
+        ? lastHeader
+        : createEmptyHeader()
+      return { ...prev, headers: [...populatedHeaders, trailingBlank] }
+    })
 
   const setBody = (body: string) =>
     setState(prev => ({ ...prev, body }))
@@ -102,18 +147,39 @@ export function useEndpointTester() {
       method: 'get',
       url: 'https://jsonplaceholder.typicode.com/posts',
       auth: { type: 'none', value: '', headerName: 'X-API-Key' },
-      headers: [],
+      headers: [createEmptyHeader()],
       body: '',
       status: 'idle',
       errorMessage: null,
       response: null,
     }))
 
-  const reset = () => setState(initialState)
+  const reset = () => {
+    runGenerationRef.current += 1
+    setState(createInitialState())
+  }
+
+  const clearHistory = () => {
+    runGenerationRef.current += 1
+    setState(prev => ({
+      ...prev,
+      status: 'idle',
+      errorMessage: null,
+      response: null,
+      requestSnapshot: null,
+      requestHistory: [],
+      responseHistory: [],
+    }))
+  }
 
   const send = async (): Promise<void> => {
+    if (!state.url.trim()) return
+
+    const generation = runGenerationRef.current
     setState(prev => ({ ...prev, status: 'sending', errorMessage: null, response: null }))
     const start = performance.now()
+    let requestSnapshotForRun: RequestSnapshot | null = null
+    let requestIdForRun: number | null = null
     try {
       const map = buildEnvMap(envVariables)
       const resolvedState: TesterState = {
@@ -139,13 +205,22 @@ export function useEndpointTester() {
       const resolveWarnings = [...new Set(allWarnings.filter(Boolean))]
       setState(prev => ({ ...prev, resolveWarnings }))
       const { url, init } = buildRequest(resolvedState)
-      const snapshot: RequestSnapshot = {
+      requestSnapshotForRun = {
         method: init.method as string,
         url,
         headers: (init.headers ?? {}) as Record<string, string>,
         body: init.body as string | undefined,
       }
-      setState(prev => ({ ...prev, requestSnapshot: snapshot }))
+      requestIdForRun = ++requestIdRef.current
+      if (!requestSnapshotForRun) return
+      const requestSnapshotForState = requestSnapshotForRun
+      const requestIdForState = requestIdForRun
+      const requestTimestamp = Date.now()
+      setState(prev => ({
+        ...prev,
+        requestSnapshot: requestSnapshotForState,
+        requestHistory: [...prev.requestHistory, { id: requestIdForState, timestamp: requestTimestamp, snapshot: requestSnapshotForState }].slice(-5),
+      }))
       const res = await fetch(url, init)
       const durationMs = Math.round(performance.now() - start)
       const bodyText = await res.text()
@@ -160,9 +235,11 @@ export function useEndpointTester() {
       }
       const headers: Record<string, string> = {}
       res.headers.forEach((v, k) => { headers[k] = v })
-      setState(prev => ({
-        ...prev,
-        status: 'success',
+      if (generation !== runGenerationRef.current) return
+      if (!requestSnapshotForRun || requestIdForRun === null) return
+      const responseLog: ResponseLogEntry = {
+        id: requestIdForState,
+        timestamp: Date.now(),
         response: {
           statusCode: res.status,
           statusText: res.statusText,
@@ -172,23 +249,46 @@ export function useEndpointTester() {
           isJson,
           durationMs,
         },
+        errorMessage: null,
+        requestSnapshot: requestSnapshotForState,
+      }
+      setState(prev => ({
+        ...prev,
+        status: 'success',
+        response: responseLog.response,
+        responseHistory: [...prev.responseHistory, responseLog].slice(-5),
       }))
     } catch (err) {
       const durationMs = Math.round(performance.now() - start)
+      if (generation !== runGenerationRef.current) return
+      const errorMessage = detectCorsError(err)
+        ? 'Network error — could not reach the server. Check the URL and your connection. If the endpoint exists, a CORS policy may be blocking cross-origin access.'
+        : 'Network error — check the URL and your connection.'
+      const errorResponse: TesterResponse = { statusCode: 0, statusText: '', headers: {}, body: '', bodyParsed: null, isJson: false, durationMs }
+      if (!requestSnapshotForRun || requestIdForRun === null) {
+        setState(prev => ({ ...prev, status: 'error', errorMessage, response: errorResponse }))
+        return
+      }
+      const requestSnapshotForError = requestSnapshotForRun
+      const requestIdForError = requestIdForRun
       setState(prev => ({
         ...prev,
         status: 'error',
-        errorMessage: detectCorsError(err)
-          ? 'Network error — could not reach the server. Check the URL and your connection. If the endpoint exists, a CORS policy may be blocking cross-origin access.'
-          : 'Network error — check the URL and your connection.',
-        response: { statusCode: 0, statusText: '', headers: {}, body: '', bodyParsed: null, isJson: false, durationMs },
+        errorMessage,
+        response: errorResponse,
+        responseHistory: [...prev.responseHistory, { id: requestIdForError, timestamp: Date.now(), response: errorResponse, errorMessage, requestSnapshot: requestSnapshotForError }].slice(-5),
       }))
     }
   }
 
-  const getEndpointPatch = (): Partial<Endpoint> => {
-    if (!state.response || state.response.statusCode === 0) return {}
-    return inferEndpoint(state, state.response)
+  const getEndpointPatch = (response = state.response, requestSnapshot = state.requestSnapshot): Partial<Endpoint> => {
+    if (!response || response.statusCode === 0 || !requestSnapshot) return {}
+    return inferEndpoint({
+      ...state,
+      method: requestSnapshot.method as HttpMethod,
+      url: requestSnapshot.url,
+      body: requestSnapshot.body ?? '',
+    }, response)
   }
 
   return {
@@ -199,15 +299,19 @@ export function useEndpointTester() {
     addHeader,
     updateHeader,
     removeHeader,
+    cleanupHeaders,
     setBody,
     send,
     loadSample,
     reset,
+    clearHistory,
     getEndpointPatch,
     envVariables,
     addEnvVariable,
     updateEnvVariable,
     removeEnvVariable,
     requestSnapshot: state.requestSnapshot,
+    requestHistory: state.requestHistory,
+    responseHistory: state.responseHistory,
   }
 }
