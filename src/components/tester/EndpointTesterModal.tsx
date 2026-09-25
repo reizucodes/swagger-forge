@@ -28,13 +28,14 @@ export function EndpointTesterModal({ open, onClose, onApplyEndpoint }: Props) {
     setMethod,
     setUrl,
     setAuth,
-    addHeader,
     updateHeader,
     removeHeader,
+    cleanupHeaders,
     setBody,
     send,
     loadSample,
     reset,
+    clearHistory,
     getEndpointPatch,
     envVariables,
     addEnvVariable,
@@ -87,8 +88,8 @@ export function EndpointTesterModal({ open, onClose, onApplyEndpoint }: Props) {
 
   if (!open) return null
 
-  const handleCreateDoc = () => {
-    const patch = getEndpointPatch()
+  const handleCreateDoc = (historicalResponse = state.response, historicalRequest = state.requestSnapshot) => {
+    const patch = getEndpointPatch(historicalResponse, historicalRequest)
     onApplyEndpoint(patch)
   }
 
@@ -208,9 +209,9 @@ export function EndpointTesterModal({ open, onClose, onApplyEndpoint }: Props) {
           {activeTab === 'headers' && (
             <TesterHeadersTab
               headers={state.headers}
-              onAdd={addHeader}
               onUpdate={updateHeader}
               onRemove={removeHeader}
+              onCleanup={cleanupHeaders}
               envNames={envVariables.map(v => v.name)}
             />
           )}
@@ -235,6 +236,9 @@ export function EndpointTesterModal({ open, onClose, onApplyEndpoint }: Props) {
             errorMessage={state.errorMessage}
             response={state.response}
             requestSnapshot={state.requestSnapshot}
+            requestHistory={state.requestHistory}
+            responseHistory={state.responseHistory}
+            onClearHistory={clearHistory}
             onCreateDoc={handleCreateDoc}
           />
         </div>
